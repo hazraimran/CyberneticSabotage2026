@@ -30,6 +30,7 @@ const questionSchema = mongoose.Schema({
 
 const userSchema = mongoose.Schema({
     username: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
     score:{type:Number,default:150},
     totalQueriesSolved: { type: Number, default: 0 },
     questions: [questionSchema]
@@ -83,17 +84,15 @@ app.get("/getUser", async (req, res) => {
     const { username,password } = req.query; // Access username from query parameters
     try {
         let user = await User.findOne({ username });
-           
-        if(password=="1234"){
-            if (!user) {
-                return res.status(200).json({username,isVerified:true}); // Handle user not found
-            }
-            else{
+        
+        if (!user) {
+            return res.status(200).json({username,isVerified:false}); // Handle user not found
+        } else if(user.password !== password) {
+            return res.status(401).json({error:"Invalid password", isVerified:false});
+        } else {
             return res.status(200).json({user,isVerified:true});
-            }
-        }else{
-            return res.status(200).json({isVerified:false});
         }
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });

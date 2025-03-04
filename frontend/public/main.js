@@ -14,7 +14,7 @@ const progressText = document.getElementById('progress-text')
 const scoreText = document.getElementById('score')
 const endButton = document.getElementById('end-game');
 
-const backendUrl = 'https://cyberneticsabotage-1.onrender.com';
+const EXTERNAL_API = 'https://cyberneticsabotage-1.onrender.com';
 
 let queryHistory = []
 let currentQueryIndex = 0
@@ -608,7 +608,7 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
   const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect,score };
 
   try {
-    const response = await fetch(`${backendUrl}/submitUserData`, {
+    const response = await fetch(`${EXTERNAL_API}/submitUserData`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

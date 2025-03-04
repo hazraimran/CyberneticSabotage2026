@@ -93,14 +93,15 @@ async function startGame(type) {
       background: '#000',
       width: '300px',
       color: '#fff',
-      text: 'There was a problem submitting your data. Please try again.',
+      text: err.message,
     })
   }
 }
 
-async function checkUser(username,password){
+async function checkUser(){
   try{
-    const response = await fetch(`${EXTERNAL_API}/getUser?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+    const password = await this.hashPassword(this.password);
+    const response = await fetch(`${EXTERNAL_API}/getUser?username=${encodeURIComponent(this.username)}&password=${encodeURIComponent(password)}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
   });
@@ -117,29 +118,28 @@ async function checkUser(username,password){
   }
 }
 
-async function registerUser(username,password){
+async function registerUser(){
   try{
+    const password = await this.hashPassword(this.password);
+    const username = this.username;
     const response = await fetch(`${EXTERNAL_API}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
-
-    if (!response.ok) {
-      const errorData = await response.json(); // Capture the response body
-      throw new Error(`Error ${response.status}: ${errorData.error || 'Unknown error'}`);
+    
+    const data = await response.json();
+    
+    if(response.status == 400){
+      throw new Error(data.error);
+    } else if(!response.ok){
+      throw new Error('There was a problem registering your data. Please try again.');
     }
 
-    const data = await response.json();
     return data;
 
   }catch(error){
-    console.error("Error registering user:", error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: 'There was a problem registering your data. Please try again.',
-    })
+    throw error;
   }
 }
 
@@ -176,20 +176,34 @@ class UserFactory {
    * @returns {Promise<void>} Updates the instance data with server response
    */
   async initializeUserInstance() {
-
     try{
       let newData = {};
       if(this.type === "register") {
-        newData = await registerUser(this.username, this.password);
+        newData = await registerUser();
       } else if(this.type === "login") {
-        newData = await checkUser(this.username, this.password); 
+        newData = await checkUser(); 
       }
       this.data = {...this.data, ...newData?.user, isVerified: newData?.isVerified};
       this.setGameConfiguration();
     }catch(error){
-      console.error("Error initializing user instance:", error);
+      throw error;
     }
   }
+
+  /**
+   * Hashes a password using SHA-256.
+   * @param {string} password - The password to hash
+   * @returns {Promise<string>} The hashed password
+   */
+  async hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(hashBuffer))
+          .map(byte => byte.toString(16).padStart(2, '0'))
+          .join('');
+  }
+
 
   /**
    * Gets the current game configuration data.
