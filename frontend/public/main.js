@@ -14,7 +14,7 @@ const progressText = document.getElementById('progress-text')
 const scoreText = document.getElementById('score')
 const endButton = document.getElementById('end-game');
 
-const backendUrl = 'https://cyberneticsabotage-1.onrender.com/';
+const backendUrl = 'https://cyberneticsabotage-1.onrender.com';
 
 let queryHistory = []
 let currentQueryIndex = 0
