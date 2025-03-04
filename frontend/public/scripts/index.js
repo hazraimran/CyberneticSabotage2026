@@ -98,50 +98,7 @@ async function startGame(type) {
   }
 }
 
-async function checkUser(){
-  try{
-    const password = await this.hashPassword(this.password);
-    const response = await fetch(`${EXTERNAL_API}/getUser?username=${encodeURIComponent(this.username)}&password=${encodeURIComponent(password)}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-  });
 
-  if (!response.ok) {
-    const errorData = await response.json(); // Capture the response body
-    throw new Error(`Error ${response.status}: ${errorData.error || 'Unknown error'}`);
-  }
-  const data = await response.json();
-  return data;
-}catch(error){
-  console.error("Error submitting data:", error);
-  alert("There was a problem submitting your data. Please try again.");
-  }
-}
-
-async function registerUser(){
-  try{
-    const password = await this.hashPassword(this.password);
-    const username = this.username;
-    const response = await fetch(`${EXTERNAL_API}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    
-    const data = await response.json();
-    
-    if(response.status == 400){
-      throw new Error(data.error);
-    } else if(!response.ok){
-      throw new Error('There was a problem registering your data. Please try again.');
-    }
-
-    return data;
-
-  }catch(error){
-    throw error;
-  }
-}
 
 
 
@@ -179,9 +136,9 @@ class UserFactory {
     try{
       let newData = {};
       if(this.type === "register") {
-        newData = await registerUser();
+        newData = await this.registerUser();
       } else if(this.type === "login") {
-        newData = await checkUser(); 
+        newData = await this.checkUser(); 
       }
       this.data = {...this.data, ...newData?.user, isVerified: newData?.isVerified};
       this.setGameConfiguration();
@@ -195,13 +152,59 @@ class UserFactory {
    * @param {string} password - The password to hash
    * @returns {Promise<string>} The hashed password
    */
-  async hashPassword(password) {
+  async _hashPassword(password) {
       const encoder = new TextEncoder();
       const data = encoder.encode(password);
       const hashBuffer = await crypto.subtle.digest("SHA-256", data);
       return Array.from(new Uint8Array(hashBuffer))
           .map(byte => byte.toString(16).padStart(2, '0'))
           .join('');
+  }
+
+  async  checkUser(){
+    try{
+      const password = await this._hashPassword(this.password);
+      const response = await fetch(`${EXTERNAL_API}/getUser?username=${encodeURIComponent(this.username)}&password=${encodeURIComponent(password)}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      console.log(response);
+      if (!response.ok) {
+        const errorData = await response.json(); // Capture the response body
+        throw new Error(`Error ${response.status}: ${errorData.error || 'Unknown error'}`);
+      }
+      const data = await response.json();
+      return data;
+
+    }catch(error){
+      throw new Error("Invalid username or password");
+    }
+  }
+  
+  async registerUser(){
+    try{
+      const password = await this._hashPassword(this.password);
+      const username = this.username;
+      const response = await fetch(`${EXTERNAL_API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await response.json();
+      
+      if(response.status == 400){
+        throw new Error(data.error);
+      } else if(!response.ok){
+        throw new Error('There was a problem registering your data. Please try again.');
+      }
+  
+      return data;
+  
+    }catch(error){
+      throw error;
+    }
   }
 
 
