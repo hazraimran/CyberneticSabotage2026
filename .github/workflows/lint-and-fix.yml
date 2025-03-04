@@ -1,0 +1,38 @@
+name: Lint and Auto-Fix
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  lint-and-fix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18  # Required for ESLint
+
+      - name: Install ESLint globally (only if needed)
+        run: npm install -g eslint
+
+      - name: Run ESLint and Auto-Fix
+        run: eslint . --fix || true  # Prevents breaking the workflow if errors exist
+
+      - name: Commit Fixes (if any)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-fixed lint issues"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

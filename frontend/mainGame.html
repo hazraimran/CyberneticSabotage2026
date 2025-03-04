@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cybernetic Sabotage</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <style>
+    #end-game{
+      background-color: rgb(94, 31, 130);
+      color: white;
+      border-color: rgb(94, 31, 130);
+      transition: color .3s linear,background-color .3s linear,border-color .3s linear;
+    }
+    #end-game:hover{
+      background-color: white;
+      color: rgb(94, 31, 130);
+      
+    }
+    .inner-box-side{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .chat-container{
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .super-image {
+      border-radius: 50%;
+      border: 2px solid var(--main-color);
+      box-shadow: 0px 0px 5px 5px rgba(229, 223, 223, 0.5);
+    }
+    .trini-image{
+      width: 80px;
+      height: 80px;
+    }
+
+    .hacker-image{
+      width: 30px;
+      height: 30px;
+      margin: 0 10px;
+    }
+
+    .super-image:hover{
+      transition: all 0.3s ease;
+      box-shadow: 0px 0px 10px 10px  var(--main-color);
+    }
+    .chat-image{
+      display: flex;
+      opacity: 0.8;
+      flex-direction: column;
+      justify-content: center;
+      margin: 20px;
+    }
+    .chat-content{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
+    }
+    .chat-message{
+      font-size: 0.8rem;
+    }
+    .chat-header h3{
+      margin: 0px;
+      font-size: 1rem;
+    }
+    table{
+      font-size: 1rem;
+    }
+    .table-data-padding{
+      padding: 5px 10px;
+    }
+
+    .side-panel-header{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center ;
+    }
+
+    .agent-name-container{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items:  center ;
+    }
+
+    .chat-message-animation {
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px var(--main-color),
+                     0 0 10px white,
+                     0 0 15px var(--main-color);
+      }
+      to {
+        text-shadow: 0 0 60px var(--main-color),
+                     0 0 60px var(--main-color), 
+                     0 0 60px var(--main-color);
+      }
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div class="main-panel">
+        <div class="main-panel-container">
+          <div class="main-panel-content">
+            <div class="display-text"></div>
+          </div>
+
+          <div class="input-box">
+            <form id="query-form" name="query-input">
+              <div class="input-container">
+                <textarea
+                  id="query-textarea"
+                  rows="8"
+                  placeholder="Enter your SQL query here"
+                  name="query-input-box"
+                ></textarea>
+                <button type="submit" id="submit-button">Submit</button>
+              </div>
+            </form>
+          </div>
+          <div class="hint-container"></div>
+        </div>
+      </div>
+
+      <div id="hint-modal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <p id="modal-content">Some text in the Modal..</p>
+          <button id="yes">Yes</button>
+          <button id="no">No</button>
+          <button id="okay">Okay</button>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="side-panel-content">
+          <div class="side-panel-header">
+            <h2>Cybernetic Sabotage</h2>
+            <div class="agent-name-container">
+              <span id="agent-name-display"></span>
+              <img class="hacker-image super-image" src="images/hacker.png" alt="Hacker Image">
+            </div>
+          </div>
+
+          <div class="button-container">
+            <button id="restart-button">Restart</button>
+            <button type="hint" id="hint-button">Hint</button>
+            <button id="settings-button">Settings</button>
+            <button id="end-game" onclick="endGame()">EndGame</button>
+          </div>
+
+          <div id="sound-modal" class="modal">
+            <div class="modal-content">
+              <span class="close" onclick="toggleSound()">&times;</span>
+              <p>Sound Options</p>
+              <button id="sound-on-button">Sound On</button>
+              <button id="sound-off-button">Sound Off</button>
+            </div>
+          </div>
+
+          <div class="info-container">
+            <div id="timer">Time: 0s</div>
+            <div id="score">Score: 150</div>
+            <div id="correct-queries">Q: 0 / 12</div>
+          </div>
+
+          <div class="progress-container">
+            <span>Progress</span>
+            <div id="progress-bar-container">
+              <div id="progress-bar">
+                <span id="progress-text"></span>
+              </div>
+            </div>
+          </div>
+
+          <table>
+            <tr>
+              <th colspan="2">Database Schema</th>
+            </tr>
+            <tr>
+              <td>Employee</td>
+              <td class="table-data-padding">employeeID, firstName, lastName, jobTitle, department, lastLogin</td>
+            </tr>
+            <tr>
+              <td>Robot</td>
+              <td class="table-data-padding">
+                robotID, Model, manufDate, status, lastUpdateOn, lastUpdatedByEmpID
+              </td>
+            </tr>
+            <tr>
+              <td>Log</td>
+              <td class="table-data-padding">
+                logID, actionDesc, timestamp, robotID, employeeID
+              </td>
+            </tr>
+            <tr>
+              <td>Incident</td>
+              <td class="table-data-padding">incidentID, desc, timestamp, reportedBy, robotID</td>
+            </tr>
+            <tr>
+              <td>AccessCode</td>
+              <td class="table-data-padding">accessCode, accessLevel, lastAccess, employeeID</td>
+            </tr>
+          </table>
+          <div class="inner-box-side">
+            <div class="chat-container">
+              <div class="chat-image">
+                <img class="trini-image super-image" src="images/trini.png" alt="Trini">
+              </div>
+              <div class="chat-content">
+                <div class="chat-header">
+                  <h3>Triny</h3>
+                </div>
+                <div class="chat-message">
+                  <p id="triny-text">Trinity Speech Text</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <audio
+      id="correct-sound"
+      src="audio/mixkit-correct-answer-tone-2870.wav"
+    ></audio>
+    <audio
+      id="incorrect-sound"
+      src="audio/mixkit-failure-arcade-alert-notification-240.wav"
+    ></audio>
+    <script src="scripts/sweetalert2.all.min.js" type="text/javascript"></script>
+    <script src="sql-wasm.js" type="text/javascript"></script>
+    <script src="scripts/queryValidator.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script>
+
+  </body>
+</html>

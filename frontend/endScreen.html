@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cybernetic Sabotage</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="modal-content">
+      <div class="textCenter">
+        <div id="main-text">Game Over</div>
+        <button id="start-page">Main Screen</button>
+        <button id="restart-gameover">Restart Game</button>
+      </div>
+
+      <form> 
+        <label for="gender">What’s your gender?</label><br>
+        <input type="radio" id="male" name="gender" value="Male" required> 
+        <label for="male">Male</label><br>
+        <input type="radio" id="female" name="gender" value="Female" required> 
+        <label for="female">Female</label><br>
+        <input type="radio" id="preferNot" name="gender" value="Prefer not to say" required> 
+        <label for="preferNot">Prefer not to say</label><br><br>
+    
+        <label for="narrative">On a scale of 1-5, how engaging did you find the game's narrative?</label><br>
+        <input type="radio" id="narrative1" name="narrative" value="Not engaging at all" required> 
+        <label for="narrative1">Not engaging at all</label><br>
+        <input type="radio" id="narrative2" name="narrative" value="Slightly engaging" required> 
+        <label for="narrative2">Slightly engaging</label><br>
+        <input type="radio" id="narrative3" name="narrative" value="Neutral" required> 
+        <label for="narrative3">Neutral</label><br>
+        <input type="radio" id="narrative4" name="narrative" value="Engaging" required> 
+        <label for="narrative4">Engaging</label><br>
+        <input type="radio" id="narrative5" name="narrative" value="Very engaging" required> 
+        <label for="narrative5">Very engaging</label><br><br>
+    
+        <label for="motivation">On a scale of 1-5, how motivated were you to complete each stage of the game?</label><br>
+        <input type="radio" id="motivation1" name="motivation" value="Not motivated at all" required> 
+        <label for="motivation1">Not motivated at all</label><br>
+        <input type="radio" id="motivation2" name="motivation" value="Slightly motivated" required> 
+        <label for="motivation2">Slightly motivated</label><br>
+        <input type="radio" id="motivation3" name="motivation" value="Neutral" required> 
+        <label for="motivation3">Neutral</label><br>
+        <input type="radio" id="motivation4" name="motivation" value="Motivated" required> 
+        <label for="motivation4">Motivated</label><br>
+        <input type="radio" id="motivation5" name="motivation" value="Very motivated" required> 
+        <label for="motivation5">Very motivated</label><br><br>
+    
+        <label for="sqlConfidence">On a scale of 1-5, how confident do you feel about your SQL skills after playing the game?</label><br>
+        <input type="radio" id="sqlConfidence1" name="sqlConfidence" value="Not confident at all" required> 
+        <label for="sqlConfidence1">Not confident at all</label><br>
+        <input type="radio" id="sqlConfidence2" name="sqlConfidence" value="Slightly confident" required> 
+        <label for="sqlConfidence2">Slightly confident</label><br>
+        <input type="radio" id="sqlConfidence3" name="sqlConfidence" value="Neutral" required> 
+        <label for="sqlConfidence3">Neutral</label><br>
+        <input type="radio" id="sqlConfidence4" name="sqlConfidence" value="Confident" required> 
+        <label for="sqlConfidence4">Confident</label><br>
+        <input type="radio" id="sqlConfidence5" name="sqlConfidence" value="Very confident" required> 
+        <label for="sqlConfidence5">Very confident</label><br><br>
+    
+        <label for="interfaceEase">On a scale of 1-5, how easy was it to navigate the game's interface?</label><br>
+        <input type="radio" id="interfaceEase1" name="interfaceEase" value="Very difficult" required> 
+        <label for="interfaceEase1">Very difficult</label><br>
+        <input type="radio" id="interfaceEase2" name="interfaceEase" value="Somewhat difficult" required> 
+        <label for="interfaceEase2">Somewhat difficult</label><br>
+        <input type="radio" id="interfaceEase3" name="interfaceEase" value="Neither easy nor difficult" required> 
+        <label for="interfaceEase3">Neither easy nor difficult</label><br>
+        <input type="radio" id="interfaceEase4" name="interfaceEase" value="Somewhat easy" required> 
+        <label for="interfaceEase4">Somewhat easy</label><br>
+        <input type="radio" id="interfaceEase5" name="interfaceEase" value="Extremely easy" required> 
+        <label for="interfaceEase5">Extremely easy</label><br><br>
+    
+        <label for="instructionsClarity">On a scale of 1-5, how clear were the instructions for completing the SQL challenges?</label><br>
+        <input type="radio" id="instructionsClarity1" name="instructionsClarity" value="Extremely unclear" required> 
+        <label for="instructionsClarity1">Extremely unclear</label><br>
+        <input type="radio" id="instructionsClarity2" name="instructionsClarity" value="Somewhat unclear" required> 
+        <label for="instructionsClarity2">Somewhat unclear</label><br>
+        <input type="radio" id="instructionsClarity3" name="instructionsClarity" value="Neither clear nor unclear" required> 
+        <label for="instructionsClarity3">Neither clear nor unclear</label><br>
+        <input type="radio" id="instructionsClarity4" name="instructionsClarity" value="Somewhat clear" required> 
+        <label for="instructionsClarity4">Somewhat clear</label><br>
+        <input type="radio" id="instructionsClarity5" name="instructionsClarity" value="Extremely clear" required> 
+        <label for="instructionsClarity5">Extremely clear</label><br><br>
+    
+        <label for="overallExperience">On a scale of 1-5, how would you rate the overall user experience of the game?</label><br>
+        <input type="radio" id="overallExperience1" name="overallExperience" value="Very poor" required> 
+        <label for="overallExperience1">Very poor</label><br>
+        <input type="radio" id="overallExperience2" name="overallExperience" value="Poor" required> 
+        <label for="overallExperience2">Poor</label><br>
+        <input type="radio" id="overallExperience3" name="overallExperience" value="Neutral" required> 
+        <label for="overallExperience3">Neutral</label><br>
+        <input type="radio" id="overallExperience4" name="overallExperience" value="Good" required> 
+        <label for="overallExperience4">Good</label><br>
+        <input type="radio" id="overallExperience5" name="overallExperience" value="Very good" required> 
+        <label for="overallExperience5">Very good</label><br><br>
+    
+        <label for="interactionFlow">On a scale of 1-5, how satisfied are you with the game's interaction flow?</label><br>
+        <input type="radio" id="interactionFlow1" name="interactionFlow" value="Extremely dissatisfied" required> 
+        <label for="interactionFlow1">Extremely dissatisfied</label><br>
+        <input type="radio" id="interactionFlow2" name="interactionFlow" value="Somewhat dissatisfied" required> 
+        <label for="interactionFlow2">Somewhat dissatisfied</label><br>
+        <input type="radio" id="interactionFlow3" name="interactionFlow" value="Neither satisfied nor dissatisfied" required> 
+        <label for="interactionFlow3">Neither satisfied nor dissatisfied</label><br>
+        <input type="radio" id="interactionFlow4" name="interactionFlow" value="Somewhat satisfied" required> 
+        <label for="interactionFlow4">Somewhat satisfied</label><br>
+        <input type="radio" id="interactionFlow5" name="interactionFlow" value="Extremely satisfied" required> 
+        <label for="interactionFlow5">Extremely satisfied</label><br><br>
+    
+        <label for="sqlRecall">On a scale of 1-5, how well do you recall the SQL concepts learned in the game?</label><br>
+        <input type="radio" id="sqlRecall1" name="sqlRecall" value="Not well at all" required> 
+        <label for="sqlRecall1">Not well at all</label><br>
+        <input type="radio" id="sqlRecall2" name="sqlRecall" value="Slightly well" required> 
+        <label for="sqlRecall2">Slightly well</label><br>
+        <input type="radio" id="sqlRecall3" name="sqlRecall" value="Moderately well" required> 
+        <label for="sqlRecall3">Moderately well</label><br>
+        <input type="radio" id="sqlRecall4" name="sqlRecall" value="Very well" required> 
+        <label for="sqlRecall4">Very well</label><br>
+        <input type="radio" id="sqlRecall5" name="sqlRecall" value="Extremely well" required> 
+        <label for="sqlRecall5">Extremely well</label><br><br>
+    
+        <label for="storylineMotivation">On a scale of 1-5, how motivated were you to progress through the game because of the storyline?</label><br>
+        <input type="radio" id="storylineMotivation1" name="storylineMotivation" value="Not motivated" required> 
+        <label for="storylineMotivation1">Not motivated</label><br>
+        <input type="radio" id="storylineMotivation2" name="storylineMotivation" value="Slightly motivated" required> 
+        <label for="storylineMotivation2">Slightly motivated</label><br>
+        <input type="radio" id="storylineMotivation3" name="storylineMotivation" value="Neutral" required> 
+        <label for="storylineMotivation3">Neutral</label><br>
+        <input type="radio" id="storylineMotivation4" name="storylineMotivation" value="Motivated" required> 
+        <label for="storylineMotivation4">Motivated</label><br>
+        <input type="radio" id="storylineMotivation5" name="storylineMotivation" value="Very motivated" required> 
+        <label for="storylineMotivation5">Very motivated</label><br><br>
+    
+        <label for="interestInSQL">Did the narrative elements (plot, theme, quests) of the game make you more interested in learning SQL?</label><br>
+        <input type="radio" id="interestInSQL1" name="interestInSQL" value="Strongly disagree" required> 
+        <label for="interestInSQL1">Strongly disagree</label><br>
+        <input type="radio" id="interestInSQL2" name="interestInSQL" value="Somewhat disagree" required> 
+        <label for="interestInSQL2">Somewhat disagree</label><br>
+        <input type="radio" id="interestInSQL3" name="interestInSQL" value="Neither agree nor disagree" required> 
+        <label for="interestInSQL3">Neither agree nor disagree</label><br>
+        <input type="radio" id="interestInSQL4" name="interestInSQL" value="Somewhat agree" required> 
+        <label for="interestInSQL4">Somewhat agree</label><br>
+        <input type="radio" id="interestInSQL5" name="interestInSQL" value="Strongly agree" required> 
+        <label for="interestInSQL5">Strongly agree</label><br><br>
+    
+        <label for="suspenseEffectiveness">How effectively did the suspense elements contribute to your engagement with the game?</label><br>
+        <input type="radio" id="suspenseEffectiveness1" name="suspenseEffectiveness" value="Not effective at all" required> 
+        <label for="suspenseEffectiveness1">Not effective at all</label><br>
+        <input type="radio" id="suspenseEffectiveness2" name="suspenseEffectiveness" value="Slightly effective" required> 
+        <label for="suspenseEffectiveness2">Slightly effective</label><br>
+        <input type="radio" id="suspenseEffectiveness3" name="suspenseEffectiveness" value="Moderately effective" required> 
+        <label for="suspenseEffectiveness3">Moderately effective</label><br>
+        <input type="radio" id="suspenseEffectiveness4" name="suspenseEffectiveness" value="Very effective" required> 
+        <label for="suspenseEffectiveness4">Very effective</label><br>
+        <input type="radio" id="suspenseEffectiveness5" name="suspenseEffectiveness" value="Extremely effective" required> 
+        <label for="suspenseEffectiveness5">Extremely effective</label><br><br>
+    
+        <label for="designFeedback">What are your overall impressions of the game's design and user interface?</label><br>
+        <textarea id="designFeedback" name="designFeedback" rows="3" cols="75" placeholder="..."></textarea><br><br>
+    
+        <label for="frustrationPoints">Were there any points in the game where you felt frustrated or stuck? If so, please describe.</label><br>
+        <textarea id="frustrationPoints" name="frustrationPoints" rows="3" cols="75" placeholder="..."></textarea><br><br>
+    
+        <label for="usabilitySuggestions">Do you have any suggestions for improving the usability of the game?</label><br>
+        <textarea id="usabilitySuggestions" name="usabilitySuggestions" rows="3" cols="75" placeholder="..."></textarea><br><br>
+    
+        <div class="textCenter">
+            <button type="submit" id="submitButton">Submit</button>
+        </div>
+        <p id="message"></p>
+    </form>
+    
+    </div>
+
+
+    <script src="endScreen.js" type="text/javascript"></script>
+  </body>
+</html>
