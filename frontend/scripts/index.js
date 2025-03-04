@@ -1,5 +1,5 @@
 
-const EXTERNAL_API = "https://sqlgameserver.onrender.com"
+const EXTERNAL_API = "https://cyberneticsabotage-1.onrender.com/"
 var canvas = document.querySelector("canvas")
 var ctx = canvas.getContext("2d")
 
