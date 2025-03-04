@@ -164,9 +164,11 @@ class UserFactory {
   async  checkUser(){
     try{
       const password = await this._hashPassword(this.password);
-      const response = await fetch(`${EXTERNAL_API}/getUser?username=${encodeURIComponent(this.username)}&password=${encodeURIComponent(password)}`, {
-        method: 'GET',
+      const response = await fetch(`${EXTERNAL_API}/login`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: this.username, password: password }),
+        mode: 'cors'
       });
       
       console.log(response);
@@ -189,7 +191,8 @@ class UserFactory {
       const response = await fetch(`${EXTERNAL_API}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        mode: 'cors'
       });
       
       const data = await response.json();

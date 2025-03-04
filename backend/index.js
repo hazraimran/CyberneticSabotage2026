@@ -10,8 +10,7 @@ const app = express();
 // Get allowed origins from .env and split into an array
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [];
 
-// Enable preflight for all routes
-app.options('*', cors()); 
+
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -25,7 +24,19 @@ app.use(cors({
     allowedHeaders: "Content-Type, Authorization"
 }));
 
+// Enable preflight for all routes
+app.options('*', cors()); 
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+    console.log("Request Origin:", req.headers.origin);
+    next();
+});
+
+// Sample route to test CORS
+app.get("/test", (req, res) => {
+    res.json({ message: "CORS is working properly!", origin: req.headers.origin , allowedOrigins: allowedOrigins });
+});
 
 mongoose.connect(process.env.MONGODB_PATH, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
@@ -97,8 +108,8 @@ app.post("/register", async (req, res) => {
     res.status(200).json({ message: "User registered successfully", user: newUser, isVerified: true });
 });
 
-app.get("/getUser", async (req, res) => {
-    const { username,password } = req.query; // Access username from query parameters
+app.post("/login", async (req, res) => {
+    const { username,password } = req.body; // Access username from query parameters
     try {
         let user = await User.findOne({ username });
         
