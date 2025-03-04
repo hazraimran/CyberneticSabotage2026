@@ -10,6 +10,9 @@ const app = express();
 // Get allowed origins from .env and split into an array
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [];
 
+// Enable preflight for all routes
+app.options('*', cors()); 
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
