@@ -1,8 +1,57 @@
-# Cybernetic Sabotage
+# Frontend - Cybernetic Sabotage
 
-Cybernetic Sabotage is an interesting thriller game that can be used to teach and test SQL concepts to students new to the topic.
+The frontend for Cybernetic Sabotage, an interactive SQL learning game with a cybersecurity theme.
 
-In this game, the player plays the role of a leading cybersecurity analyst who has been called in after a major tech corporation, RoboTech Global, has experienced a series of strange occurrences within their AI-driven robotics division. There are fears of an inside job, corporate espionage, or even an AI gone rogue. Their mission is to use SQL to dive into the company's extensive databases and uncover the truth.
+## Description
 
-In classic fashion, this game comprises suspense and intrigue with an adventure role-play theme to introduce students to SQL concepts that grow in complexity gradually as the game
-progresses. It ends when the player has successfully used all the SQL concepts and written the relevant queries that eventually leads them to find the problem. 
+This is the frontend portion of Cybernetic Sabotage, featuring:
+
+- Interactive SQL query interface with real-time validation
+- Engaging cybersecurity storyline where players investigate suspicious activities at RoboTech Global
+- Matrix-style visual effects and cyberpunk aesthetics
+- User authentication system with progress tracking
+- Progressive difficulty levels teaching SQL concepts from basic to advanced
+- Hint system to assist learning
+- Score tracking and performance metrics
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.x
+- Modern web browser (Chrome, Firefox, Safari, or Edge recommended)
+- Internet connection for backend API communication
+
+### Running Locally
+
+1. Clone the repository
+2. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+3. Run the Python server:
+   ```bash
+   python3 server.py
+   ```
+4. Open your browser and visit:
+   ```
+   http://localhost:8080
+   ```
+
+### Features
+
+- **User Authentication**: Create an account or login to track your progress
+- **Interactive Tutorial**: Learn SQL through hands-on exercises
+- **Progressive Story**: Uncover the mystery while learning database concepts
+- **Real-time Feedback**: Immediate response on query correctness
+- **Performance Tracking**: Monitor your progress and improvement
+- **Cross-platform**: Works on any device with a modern web browser
+
+### Technical Details
+
+- Vanilla JavaScript for frontend logic
+- Custom Python HTTP server for local development
+- RESTful API integration with backend services
+- Local storage for maintaining session state
+- Responsive design for various screen sizes
+

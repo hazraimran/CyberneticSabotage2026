@@ -7,7 +7,21 @@ console.log("MongoDB Path:", process.env.MONGODB_PATH); // Debugging line
 
 const app = express();
 
-app.use(cors());
+// Get allowed origins from .env and split into an array
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "Content-Type, Authorization"
+}));
+
 app.use(bodyParser.json());
 
 mongoose.connect(process.env.MONGODB_PATH, { useNewUrlParser: true, useUnifiedTopology: true })
