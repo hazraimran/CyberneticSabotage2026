@@ -363,6 +363,8 @@ window.addEventListener('click', function (event) {
   }
 })
 
+
+
 form.addEventListener('submit', function (event) {
   event.preventDefault()
   const queryWrapper = document.createElement('div')
@@ -386,8 +388,6 @@ form.addEventListener('submit', function (event) {
     executeQuery(query, queryHistory.length - 1, queryWrapper)
     getStory(true, query)
     
-    // Clear textarea after successful query
-    textarea.value = ''
   }
 
   // Scroll to bottom once at the end
@@ -552,6 +552,7 @@ function executeQuery (query, index, queryWrapper) {
       displayResults(queryWrapper, results[0])
       if (validateResult(results[0].values, currentQueryIndex)) {
         flag = true
+        textarea.value = ''
       } else {
         flag = false
       }
@@ -624,4 +625,12 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
     alert("There was a problem submitting your data. Please try again."); // User-friendly message
   }
 }
+
+
+//Adding controls for enter key to submit the query
+window.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    form.dispatchEvent(new Event('submit'));
+  }
+})
 
