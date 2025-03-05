@@ -76,7 +76,7 @@ function isSelectQuery(query) {
   const otherKeywords = [
       "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "ALTER", "TRUNCATE",
       "REPLACE", "MERGE", "WITH", "GRANT", "REVOKE", "EXEC", "CALL", "JOIN",
-      "BEGIN", "COMMIT", "ROLLBACK", "USE", "EXPLAIN"
+      "BEGIN", "COMMIT", "ROLLBACK", "USE", "EXPLAIN", "ORDER BY", "GROUP BY", "LIMIT", "OFFSET"
   ];
   
   const trimmedQuery = query.trim().toUpperCase();

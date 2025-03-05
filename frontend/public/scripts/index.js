@@ -1,5 +1,5 @@
 
-const EXTERNAL_API = "https://cyberneticsabotage-1.onrender.com"
+const EXTERNAL_API = window.config.EXTERNAL_API
 var canvas = document.querySelector("canvas")
 var ctx = canvas.getContext("2d")
 
@@ -164,19 +164,20 @@ class UserFactory {
   async  checkUser(){
     try{
       const password = await this._hashPassword(this.password);
-      const response = await fetch(`${EXTERNAL_API}/login`, {
+      const response = await fetch(`${EXTERNAL_API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: this.username, password: password }),
         mode: 'cors'
       });
       
-      console.log(response);
       if (!response.ok) {
         const errorData = await response.json(); // Capture the response body
         throw new Error(`Error ${response.status}: ${errorData.error || 'Unknown error'}`);
       }
       const data = await response.json();
+
+      console.log(data);
       return data;
 
     }catch(error){
@@ -188,7 +189,7 @@ class UserFactory {
     try{
       const password = await this._hashPassword(this.password);
       const username = this.username;
-      const response = await fetch(`${EXTERNAL_API}/register`, {
+      const response = await fetch(`${EXTERNAL_API}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

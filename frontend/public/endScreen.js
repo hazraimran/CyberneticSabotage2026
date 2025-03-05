@@ -3,6 +3,8 @@ const restartEndButton = document.getElementById('restart-gameover')
 const headerText = document.getElementById('main-text')
 const submitButton = document.getElementById('submitButton');
 
+const EXTERNAL_API = window.config.EXTERNAL_API
+
 startPageButton.addEventListener('click',goToMain);
 restartEndButton.addEventListener('click', restart)
 
@@ -51,7 +53,7 @@ submitButton.onclick = (e) => {
 
 async function submitRes(usr_res) {
   try {
-    const response = await fetch('https://sqlgameserver.onrender.com/submitSurveyResponse', {
+    const response = await fetch(EXTERNAL_API + '/survey/submitSurveyResponse', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(usr_res),
