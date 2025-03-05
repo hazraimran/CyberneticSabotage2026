@@ -141,8 +141,12 @@ const answerKeys = [
   ]
 ]
 
+// Load the image prealoader
+const img = new Image();
+img.src = "images/white-rabbit.png"; 
+
 const whiteRabbitConfiguration = {
-  imageUrl: "images/white-rabbit.png",
+  imageUrl: img.src,
   imageWidth: 200,
   imageHeight: 200,
   background : "linear-gradient(to right, #000, green)",
