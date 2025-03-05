@@ -1,23 +1,23 @@
 # Backend - Cybernetic Sabotage
 
-The backend server for Cybernetic Sabotage, providing API endpoints and database functionality.
+The backend server for Cybernetic Sabotage, an interactive SQL learning game that simulates investigating and fixing malfunctioning robots.
 
 ## Description
 
 This is the backend portion of Cybernetic Sabotage, featuring:
 
-- RESTful API endpoints for game functionality
-- MongoDB database integration for user data storage
-- User authentication and session management
-- Progress tracking and scoring system
-- Query validation and response handling
+- RESTful API endpoints for game mechanics and user progress
+- MongoDB database integration for persistent user data storage
+- Real-time query validation and execution
+- Progress tracking with scoring system
+- User response and feedback collection
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js
-- MongoDB
+- Node.js (v14 or higher)
+- MongoDB Atlas account
 - npm (Node Package Manager)
 
 ### Installation
@@ -31,9 +31,12 @@ This is the backend portion of Cybernetic Sabotage, featuring:
    ```bash
    npm install
    ```
-4. Create a `.env` file with your MongoDB connection string:
+4. Configure environment variables in `.env`:
    ```
-   MONGODB_URI=your_mongodb_connection_string
+   MONGODB_USERNAME=your_username
+   MONGODB_PASSWORD=your_password
+   MONGODB_PATH=your_mongodb_connection_string
+   ALLOWED_ORIGINS=comma_separated_origins
    ```
 5. Start the server:
    ```bash
@@ -42,45 +45,77 @@ This is the backend portion of Cybernetic Sabotage, featuring:
 
 ## API Endpoints
 
-### User Management
-- `POST /register` - Register new user
-- `GET /getUser` - Authenticate and retrieve user data
-- `GET /getUsers` - Get all users (admin only)
+### Authentication Routes
+`/auth`
+- **POST** `/register`
+  - Register a new user
+  - Body: `{ username: string, password: string }`
+  - Returns: User object with token
 
-### Game Progress
-- `POST /submitUserData` - Save user's query attempts and progress
-- `POST /submitSurveyResponse` - Store user feedback and responses
+- **POST** `/login` 
+  - Login existing user
+  - Body: `{ username: string, password: string }`
+  - Returns: User object with token
+
+### User Routes
+`/users`
+- **GET** `/`
+  - Get all users
+  - Returns: Array of user objects
+
+- **POST** `/submitUserData`
+  - Submit user game data
+  - Body: `{ username: string, score: number, queries: array }`
+  - Returns: Updated user object
+
+### Survey Routes  
+`/survey`
+- **POST** `/submitSurveyResponse`
+  - Submit survey response
+  - Body: `{ username: string, responses: object }`
+  - Returns: Created survey response object
+
 
 ## Database Schema
 
 ### User Model
 - username (String, unique)
-- password (String, hashed)
-- timestamps
+- score (Number)
+- totalQueriesSolved (Number)
+- questions (Array)
+  - questionId (Number)
+  - timeUsed (Number)
+  - query (String)
+  - isCorrect (Boolean)
+  - hintsUsed (Number)
 
 ### UserResponse Model
 - username (String, unique)
 - responses (Object)
-- password (String)
 
-## Security Features
+## Game Features
 
-- Password hashing
-- Input validation
-- Error handling
-- Session management
+- Real-time SQL query validation
+- Progressive difficulty levels
+- Hint system with scoring impact
+- Time tracking per query
+- Detailed progress tracking
 
 ## Technical Stack
 
 - Express.js for API routing
-- MongoDB with Mongoose ODM
+- MongoDB Atlas for cloud database
+- Mongoose ODM for data modeling
 - Node.js runtime environment
-- RESTful architecture
+- SQL.js for query validation
 
-## CORS Configuration
+## Security & Configuration
 
-The following origins are allowed to access the API:
-SET on you .env file  ALLOWED_ORIGINS= with the allowed origins
+- Environment-based configuration
+- CORS protection with whitelisted origins
+- Input validation and sanitization
+- Error handling and logging
 
-CORS is configured using the `cors` middleware with specific allowed origins defined in the `.env` file:
-
+The API allows access from origins specified in ALLOWED_ORIGINS environment variable. Current allowed origins:
+- http://localhost:8080
+- https://cyberneticsabotage-2.onrender.com
