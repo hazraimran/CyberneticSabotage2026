@@ -1,5 +1,5 @@
-let currentScene = 0
-let interval
+let currentScene = -1
+let titleInterval, storyInterval
 let writing = false
 let agentName = localStorage.getItem('user')
 const sceneTitleElement = document.getElementById('scene-title')
@@ -30,14 +30,14 @@ const sceneText = [['The Digital Age',
 document.getElementById('begin-button').addEventListener('click', beginGame)
 
 function nextScene () {
-  if (currentScene === sceneText.length - 1 || writing) return
-  currentScene = (currentScene + 1) % sceneText.length
+  if (currentScene === sceneText.length - 1) return
+  if (!writing) currentScene = currentScene + 1
   displayText()
 }
 
 function previousScene () {
-  if (currentScene === 0 || writing) return
-  currentScene = (currentScene - 1 + sceneText.length) % sceneText.length
+  if (currentScene === 0 ) return
+  if(!writing) currentScene = currentScene - 1
   displayText()
 }
 
@@ -61,17 +61,28 @@ function displayText() {
   sceneTitleElement.style.opacity = 1;
   sceneTextElement.style.opacity = 1;
 
+  if (writing) {
+    writing = false
+    if(titleInterval) clearInterval(titleInterval)
+    if(storyInterval) clearInterval(storyInterval)
+
+    sceneTitleElement.textContent = titleText
+    sceneTextElement.textContent = storyText;
+    displayArrows()
+    return
+  } 
+  
   writing = true
   displayArrows(true)
   // Animate title
-  const titleInterval = setInterval(() => {
+  titleInterval = setInterval(() => {
     if (titleIndex < titleText.length) {
       sceneTitleElement.textContent += titleText.charAt(titleIndex);
       titleIndex++;
     } else {
       clearInterval(titleInterval);
       // Start story text animation after title completes
-      const storyInterval = setInterval(() => {
+      storyInterval = setInterval(() => {
         if (storyIndex < storyText.length) {
           sceneTextElement.textContent += storyText.charAt(storyIndex);
           storyIndex++;
@@ -92,7 +103,7 @@ function displayText() {
 }
 
 function displayArrows (writing) {
-  if (currentScene > 1 && !writing) {
+  if (currentScene > 0 && !writing) {
     document.getElementById('arrow-left').style.display = 'block'
   } else {
     document.getElementById('arrow-left').style.display = 'none'

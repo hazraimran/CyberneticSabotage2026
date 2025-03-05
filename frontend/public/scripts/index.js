@@ -70,7 +70,6 @@ async function startGame(type) {
     width: '300px',
     color: '#fff',
     text: 'Robotech is verifying your data...',
-    allowOutsideClick: false,
     showConfirmButton: false,
     didOpen: () => {
       Swal.showLoading();
