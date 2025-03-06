@@ -1,4 +1,3 @@
-
 const EXTERNAL_API = window.config.EXTERNAL_API
 var canvas = document.querySelector("canvas")
 var ctx = canvas.getContext("2d")
@@ -96,9 +95,6 @@ async function startGame(type) {
     })
   }
 }
-
-
-
 
 
 /**

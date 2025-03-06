@@ -1,0 +1,147 @@
+body {
+  background-color: black;
+  color: lime;
+  font-family: "Courier New", Courier, monospace;
+  overflow: hidden;
+}
+
+#container{
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: auto;
+  width: 500px;
+}
+
+#title {
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  animation: type 4s steps(30, end), fadein 2s;
+  overflow: hidden;
+  white-space: nowrap;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#input-container {
+
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 24ch;
+  margin: auto;
+  padding: 10px;
+
+}
+#input-container input{
+  background-color: black;
+  color: green;
+  text-align: center;
+  border: 2px solid green;
+  padding: 10px;
+  margin-top: 2rem;
+  width: 55%;
+}
+
+#input-container input::placeholder{
+  background-color: black;
+  color: green;
+  text-align: center;
+  font-size: 24px;
+  font-family: 'Courier New', Courier, monospace;
+}
+#input-container input::active{
+  outline: none;
+  border: 2px solid green;
+}
+
+.routing-button {
+  text-align: center;
+  font-size: 1.5em;
+  animation: blink 1.5s infinite, fadein 4s;
+  cursor: pointer;
+  transition: ease-in-out color 0.3s, transform 0.3s, background-color 0.3s , border 0.3s;
+  border: 2px solid green;
+  background-color: rgba(0, 255, 0, 0.6);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.routing-button:hover {
+  color: white;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2px solid white;
+}
+
+.hidden{
+  display: none;
+}
+#input-container p{  
+  font-size: 10px;
+}
+
+@keyframes type {
+  0% {
+    width: 0ch;
+  }
+  100% {
+    width: 24ch;
+  }
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  50% {
+    color: transparent;
+  }
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+#button-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  margin: 20px auto;
+  width: 70%;
+  height: 100px;
+  /* transform: translate(-50%, -50%); */
+}
+#button-container div{
+  cursor: pointer;
+}
+
+.routing-button::before{
+  content: ">_";
+}
+.white-text{
+  color: white;
+}
+.register-text{
+  color: green;
+}
+
+a {
+  text-decoration: none;
+}
