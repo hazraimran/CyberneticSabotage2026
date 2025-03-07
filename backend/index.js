@@ -7,6 +7,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import surveyRoutes from "./routes/surveyRoutes.js";
+import pinRoutes from "./routes/pinRoutes.js";
 import cors from "cors";
 
 // Connect to MongoDB
@@ -23,6 +24,7 @@ app.use(express.json()); //parse json bodies in the request
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/survey", surveyRoutes);
+app.use("/pin", pinRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
