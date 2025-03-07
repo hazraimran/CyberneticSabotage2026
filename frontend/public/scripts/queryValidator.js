@@ -35,7 +35,7 @@ function isValidSQLQuery(query) {
       "SELECT", "INSERT INTO", "UPDATE", "DELETE FROM", "CREATE TABLE", "JOIN",
       "DROP TABLE", "ALTER TABLE", "TRUNCATE TABLE", "REPLACE", "MERGE",
       "WITH", "GRANT", "REVOKE", "EXEC", "CALL", "BEGIN", "COMMIT", 
-      "ROLLBACK", "USE", "EXPLAIN"
+      "ROLLBACK", "USE", "EXPLAIN", "CREATE", "CREATE INDEX", "CREATE PROCEDURE", "CREATE FUNCTION", "CREATE VIEW"
   ];
 
   // Check if query starts with a valid SQL keyword
@@ -55,7 +55,6 @@ function isValidSQLQuery(query) {
   const forbiddenPatterns = [
       /--/,         // Inline comments (potential SQL injection)
       /\/\*/,       // Block comments
-      /;.*;/,       // Stacked queries
       /DROP\s+TABLE/i // Destructive query detection
   ];
 

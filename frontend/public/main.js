@@ -44,10 +44,25 @@ const queries = [
   " Let's compile all the evidence. Create a view that connects the 'Incident' and 'Robot' tables, showing all incidents related to each robot model. Include the robot ID, model, employee who last updated it, incident ID, incident description, incident timestamp, and the name of the employee responsible for the update. Then, display the view.",
   " Let's uncover the problematic robot models! Find all models that have been involved in more than 2 incidents. Return only the model names.",
   " We need a repair log! Create a 'Repair' table with columns for repair ID((INTEGER), repairStatus (TEXT), desc(TEXT), robotID(TEXT),  and the employee who performed the repair as and repairedById (TEXT)",
-  " Time to record a repair case. Insert a new repair record with the given details into the 'Repair' table.",
+  " Time to record a repair case. Insert a new repair record with the given details into the 'Repair' table. (repairID = 1, repairStatus = 'Under Repair', desc = 'This robot model is undergoing repair due to its defaulty patterns', robotID = 5, repairedById = 7)",
   " Who last worked on the faulty robots? Identify the most recent employee who updated the software of malfunctioning robots. Return their employee ID, first name, last name, the timestamp of the last update, and the robot ID they updated."
 ]
 storyline.textContent = queries[0]
+
+const queryAnswers = [
+  'SELECT * FROM Incident;',
+  'SELECT * FROM Incident ORDER BY timeStamp DESC LIMIT 1;',
+  'SELECT r.Model, COUNT(i.incidentID) AS IncidentCount FROM Robot AS r LEFT JOIN Incident AS i ON r.robotID = i.robotID GROUP BY r.Model;',
+  'SELECT COUNT(DISTINCT robotID) AS NumberOfUpdatedRobots FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\';',
+  'SELECT DISTINCT e.employeeID, e.firstName, e.lastName FROM Employee e WHERE e.employeeID IN ( SELECT DISTINCT lastUpdatedByEmpID FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\' );',
+  'UPDATE Robot SET status = \'Under Repair\' WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\';',
+  'SELECT lastUpdatedByEmpID AS employeeID, COUNT(*) AS NumberOfIncidents FROM Robot GROUP BY lastUpdatedByEmpID ORDER BY COUNT(*) DESC LIMIT 1;',
+  'CREATE VIEW RobotIncidentView AS SELECT r.robotID, r.Model, r.lastUpdatedByEmpID, i.incidentID, i.desc, i.timeStamp, e.firstName, e.lastName FROM Robot r JOIN Incident i ON r.robotID = i.robotID JOIN Employee e ON r.lastUpdatedByEmpID = e.employeeID; SELECT * FROM RobotIncidentView;',
+  'SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );',
+  'CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );',
+  'INSERT INTO Repair ("repairID", "repairStatus", "desc", "robotID", "repairedById" ) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7);', 
+  'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'In Repair\';'
+]
 
 const hints = [
   [['To list all the incidents from the \'Incident\' table, your first hint would be to use the select statement here.'], ['Next you can try following the structure of the query in the form of SELECT _ FROM [TableName] to get all the incidents from the \'Incident\' table. ']],
@@ -238,7 +253,19 @@ function getStory (increaseScore = true, query = '') {
   const nextQueryIndex = currentQueryIndex + 1
   if (flag === true && nextQueryIndex <= queries.length) {
     if (nextQueryIndex === queries.length) {
-      location.assign('endScreen.html?gameStatus=win')
+      Swal.fire({
+        title: 'Game Over',
+        text: 'RoboTech has been saved. Would you like to try again?',
+        icon: 'success',
+        background: '#000',
+        color: '#fff',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          restartGame();
+        } else {
+          endGame();
+        }
+      })
     } else {
       const nextQuery = queries[nextQueryIndex]
       storyline.textContent = nextQuery
@@ -387,7 +414,7 @@ form.addEventListener('submit', function (event) {
     queryHistory.push(query)
     queryParagraph.textContent = query
     queryWrapper.appendChild(queryParagraph)
-    
+    console.log(queryHistory)
     // Execute query and update UI
     executeQuery(query, queryHistory.length - 1, queryWrapper)
     getStory(true, query)
@@ -457,8 +484,7 @@ hintButton.onclick = function () {
       toast: true,
 
     }).then(() => {
-      flag = true
-      getStory(false)
+       textarea.value = queryAnswers[currentQueryIndex];
     })
   }
 }
@@ -542,10 +568,13 @@ function initializeDB () {
 function executeQuery (query, index, queryWrapper) {
   try {
     const results = db.exec(query)
+    console.log(results)
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.')
+      console.log(currentQueryIndex)
       if (currentQueryIndex === 0) {
         const results2 = db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;')
+        console.log({results2})
         if (validateResult(results2[0].values, currentQueryIndex)) {
           flag = true
         } else {
@@ -554,12 +583,17 @@ function executeQuery (query, index, queryWrapper) {
       }
     } else {
       displayResults(queryWrapper, results[0])
+      console.log(results[0])
       if (validateResult(results[0].values, currentQueryIndex)) {
         flag = true
-        textarea.value = ''
+
       } else {
         flag = false
       }
+    }
+
+    if (flag) {
+      textarea.value = ''
     }
   } catch (error) {
     const errorMessage = 'ERROR: ' + error.message
@@ -578,10 +612,13 @@ function displayError (queryWrapper, message) {
 
 function validateResult (resultValues, queryIndex) {
   const answerKey = answerKeys[queryIndex]
+
+  console.log(answerKey, resultValues)
   if (!answerKey || resultValues.length !== answerKey.length) {
     return false
   }
 
+  console.log(resultValues, answerKey)
   for (let i = 0; i < resultValues.length; i++) {
     for (let j = 0; j < resultValues[i].length; j++) {
       const expectedValue = answerKey[i][j]
