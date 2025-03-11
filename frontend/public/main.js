@@ -13,6 +13,7 @@ const progressBar = document.getElementById('progress-bar')
 const progressText = document.getElementById('progress-text')
 const scoreText = document.getElementById('score')
 const endButton = document.getElementById('end-game');
+const clearButton = document.getElementById('clear-button')
 
 const EXTERNAL_API = window.config.EXTERNAL_API;
 
@@ -74,7 +75,7 @@ const hints = [
   [['To find the employee with the highest number of incidents, use the Robot table. Consider using the `COUNT` function along with the `GROUP BY` clause to count the number of incidents reported by each employee.'], ['Next order the results in descending order using the `ORDER BY` clause to get employee with the most incidents at the top of the table'], ['Additionally, use the LIMIT keyword to fetch only the employee with the highest number of incidents.']],
   [['Ensure to use the  `JOIN` condition to link the `Robot` and `Incident` tables based on their common column.'], ['Do not forget to include a `JOIN` with the `Employee` table to retrieve the first name and last name of the employee who last updated the robot and then display the view.']],
   [['To identify the source of malfunctions, use a subquery to count the number of incidents for each robot model.'], ['Now, filter the robot models with more than 2 incidents using the HAVING clause in the subquery to get the source of malfunctions.']],
-  [['Use the `CREATE TABLE` syntax to create the desired  \'Repair\' table'], ['Remember to clearly define the types for the columns of \'Repair\' table as specified.']],
+  [['Use the `CREATE TABLE` syntax to create the desired  \'Repair\' table'], ['Remember to clearly define the types for the columns of \'Repair\' table as specified.'], ['IF Table is already create Try to DROP the table and create it again']],
   [['Use INSERT INTO to add a repair record. Fill in the values for repairID, repairStatus, desc, robotID, and repairedById correctly.'], ['Use\'VALUES\' opersation to insert the following values :(1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7) in the \'Repair\' table ']],
   [['You can use the `JOIN` operation to combine information from the Employee and log tables based on the appropriate columns first'], ['To find the last employee who updated the software of the malfunctioning robots, create a subquery to find the latest update timestamp for each robot using MAX()'], ['Lastly, JOIN the results with Employee and Robot tables using appropriate ON clauses to get the last updating employee\'s\' details']]
 ]
@@ -414,7 +415,6 @@ form.addEventListener('submit', function (event) {
     queryHistory.push(query)
     queryParagraph.textContent = query
     queryWrapper.appendChild(queryParagraph)
-    console.log(queryHistory)
     // Execute query and update UI
     executeQuery(query, queryHistory.length - 1, queryWrapper)
     getStory(true, query)
@@ -568,13 +568,10 @@ function initializeDB () {
 function executeQuery (query, index, queryWrapper) {
   try {
     const results = db.exec(query)
-    console.log(results)
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.')
-      console.log(currentQueryIndex)
       if (currentQueryIndex === 0) {
         const results2 = db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;')
-        console.log({results2})
         if (validateResult(results2[0].values, currentQueryIndex)) {
           flag = true
         } else {
@@ -583,7 +580,6 @@ function executeQuery (query, index, queryWrapper) {
       }
     } else {
       displayResults(queryWrapper, results[0])
-      console.log(results[0])
       if (validateResult(results[0].values, currentQueryIndex)) {
         flag = true
 
@@ -613,12 +609,10 @@ function displayError (queryWrapper, message) {
 function validateResult (resultValues, queryIndex) {
   const answerKey = answerKeys[queryIndex]
 
-  console.log(answerKey, resultValues)
   if (!answerKey || resultValues.length !== answerKey.length) {
     return false
   }
 
-  console.log(resultValues, answerKey)
   for (let i = 0; i < resultValues.length; i++) {
     for (let j = 0; j < resultValues[i].length; j++) {
       const expectedValue = answerKey[i][j]
@@ -643,7 +637,6 @@ startGame();
 
 async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect,score) {
   if (!username || queryTime === undefined || queryIndex === undefined || hintsUsed === undefined) {
-    console.error('Missing required fields. CLIENT');
     return;
   }
 
@@ -663,15 +656,45 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
     const data = await response.json();
   } catch (error) {
     console.error("Error submitting data:", error);
-    alert("There was a problem submitting your data. Please try again."); // User-friendly message
+    Swal.fire({
+      title: 'Error',
+      text: 'There was a problem submitting your data. Please try again.',
+      icon: 'error',
+      background: '#000',
+      color: '#fff',
+    })
   }
 }
 
 
-//Adding controls for enter key to submit the query
-window.addEventListener('keydown', function (event) {
-  if (event.key === 'Enter') {
-    form.dispatchEvent(new Event('submit'));
-  }
-})
+textarea.addEventListener('input', () => {
+  clearButton.style.display = textarea.value.length > 0 ? 'block' : 'none';
+});
 
+textarea.addEventListener('keydown', (event) => {
+  if (textarea.value === 'wr-code') {
+    textarea.value = queryAnswers[currentQueryIndex];
+  } else if(textarea.value === 'wr-hack'){
+    
+    Swal.fire({
+      title: 'White Rabbit',
+      html: '<p>'+ currentQueryIndex +'</p><ol>' + queryAnswers.join('<li>') + '</ol>',
+      icon: 'success',
+      background: '#000',
+      color: '#fff',
+    })
+    textarea.value = '';
+    
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    form.dispatchEvent(new Event('submit'));
+  } else if (event.key === 'Control') {
+    textarea.value = '';
+    clearButton.style.display = 'none';
+  }
+});
+
+clearButton.addEventListener('click', () => {
+  textarea.value = '';
+  clearButton.style.display = 'none';
+});

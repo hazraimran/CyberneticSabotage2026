@@ -139,13 +139,13 @@ Text:active{
   
 }
 
-#submit-button {
+.submit-button-interface {
   background-color: black;
   color: var(--main-color);
   padding: 10px 20px;
   cursor: pointer;
   box-sizing: border-box;
-  margin: auto;
+  /* margin: auto; */
   margin-right: 10px;
   height: 50px;
   box-shadow: none
@@ -296,7 +296,7 @@ tr:first-child > th {
   border-bottom: 1px solid var(--main-color);
 }
 
-.button-container {
+.button-container-1 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;

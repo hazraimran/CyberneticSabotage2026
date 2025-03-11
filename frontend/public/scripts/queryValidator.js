@@ -55,7 +55,7 @@ function isValidSQLQuery(query) {
   const forbiddenPatterns = [
       /--/,         // Inline comments (potential SQL injection)
       /\/\*/,       // Block comments
-      /DROP\s+TABLE/i // Destructive query detection
+      // /DROP\s+TABLE/i // Destructive query detection
   ];
 
   if (forbiddenPatterns.some(pattern => pattern.test(query))) return false;

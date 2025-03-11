@@ -93,6 +93,17 @@
       animation: glow 2s ease-in-out infinite alternate;
     }
 
+    .button-container{
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #clear-button{
+      display: none;
+    }
+    
+
     @keyframes glow {
       from {
         text-shadow: 0 0 5px var(--main-color),
@@ -123,7 +134,10 @@
                   placeholder="Enter your SQL query here"
                   name="query-input-box"
                 ></textarea>
-                <button type="submit" id="submit-button">Submit</button>
+                <div class="button-container">
+                  <button type="submit" class="submit-button-interface">Submit</button>
+                  <span id="clear-button" class="submit-button-interface" title="Clear content with control + c">Clear</span>
+                </div>
               </div>
             </form>
           </div>
@@ -151,7 +165,7 @@
             </div>
           </div>
 
-          <div class="button-container">
+          <div class="button-container-1">
             <button id="restart-button">Restart</button>
             <button type="hint" id="hint-button">Hint</button>
             <button id="settings-button">Settings</button>
