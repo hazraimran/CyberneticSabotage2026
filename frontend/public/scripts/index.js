@@ -172,7 +172,10 @@ class UserFactory {
       }
       const data = await response.json();
 
-      console.log(data);
+      //Fixing error with the response from the server
+      if (data && !data.isVerified) {
+        throw new Error("Invalid username or password");
+      }
       return data;
 
     }catch(error){

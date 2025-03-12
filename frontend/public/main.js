@@ -685,12 +685,6 @@ textarea.addEventListener('keydown', (event) => {
     })
     textarea.value = '';
     
-  } else if (event.key === 'Enter') {
-    event.preventDefault();
-    form.dispatchEvent(new Event('submit'));
-  } else if (event.key === 'Control') {
-    textarea.value = '';
-    clearButton.style.display = 'none';
   }
 });
 
