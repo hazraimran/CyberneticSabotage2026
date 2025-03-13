@@ -223,11 +223,14 @@ function startGame () {
       score = parseInt(score, 10); // Convert score back to a number if it's stored as a string
   }
   correctQueriesSolved= parseInt(localStorage.getItem('totalQueriesSolved') ?? 0,10);
+
+  console.log({correctQueriesSolved});
   if(correctQueriesSolved > 0){
   }else{
     correctQueriesSolved=0;
     correctQueriesSolved=parseInt(correctQueriesSolved,10);
   }
+  console.log({correctQueriesSolved});
   scoreText.textContent='Score: '+score;
   document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved) + ' / 12';
   currentQueryIndex=correctQueriesSolved??0;
@@ -236,6 +239,7 @@ function startGame () {
   storyline.textContent = nextQuery
   progress = 10
   setInterval(updateTimer, 1000)
+  updateScore(0)
   initializeDB()
   updateProgressBar(correctQueriesSolved*8)
 }
@@ -278,6 +282,7 @@ function getStory (increaseScore = true, query = '') {
       hintCounter = 0
       currentQueryIndex = nextQueryIndex
       if (increaseScore) {
+        correctQueriesSolved++
         updateScore(100)
       }
       updateProgressBar(8)
@@ -324,12 +329,7 @@ function updateScore (change) {
   score = score + change
   scoreText.textContent = 'Score: ' + score
   
-  // //Updating the correct queries solved
-  if(change > 0){
-    correctQueriesSolved++
-  }
-
-  document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved) + ' / 12'
+  document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved + 1) + ' / 12'
 
   if (change > 0 && soundEnabled) {
     const correctSound = document.getElementById('correct-sound')
@@ -683,7 +683,7 @@ textarea.addEventListener('keydown', (event) => {
     
     Swal.fire({
       title: 'White Rabbit',
-      html: '<p>'+ currentQueryIndex +'</p><ol>' + queryAnswers.join('<li>') + '</ol>',
+      html: '<p>'+ (currentQueryIndex) +'</p><ol>' + queryAnswers.join('<li>') + '</ol>',
       icon: 'success',
       background: '#000',
       color: '#fff',
