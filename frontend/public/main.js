@@ -255,8 +255,8 @@ function getStory (increaseScore = true, query = '') {
   if (flag === true && nextQueryIndex <= queries.length) {
     if (nextQueryIndex === queries.length) {
       Swal.fire({
-        title: 'Game Over',
-        text: 'RoboTech has been saved. Would you like to try again?',
+        title: 'Congratulations!',
+        text: 'You have saved RoboTech. Would you like to try again?',
         icon: 'success',
         background: '#000',
         color: '#fff',
@@ -281,7 +281,7 @@ function getStory (increaseScore = true, query = '') {
         updateScore(100)
       }
       updateProgressBar(8)
-      correctQueriesSolved++
+      
     }
   } else {
     const currentQuery = queries[currentQueryIndex]
@@ -323,8 +323,13 @@ function updateTimer () {
 function updateScore (change) {
   score = score + change
   scoreText.textContent = 'Score: ' + score
+  
+  // //Updating the correct queries solved
+  if(change > 0){
+    correctQueriesSolved++
+  }
 
-  document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved+1) + ' / 12'
+  document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved) + ' / 12'
 
   if (change > 0 && soundEnabled) {
     const correctSound = document.getElementById('correct-sound')
