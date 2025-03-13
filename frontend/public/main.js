@@ -575,22 +575,14 @@ function executeQuery (query, index, queryWrapper) {
     const results = db.exec(query)
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.')
-      if (currentQueryIndex === 0) {
+      //TODO: This is a hack to validate the result of the query, I didnt create this, I'm not proud of it.
+      if (currentQueryIndex === 9) {
         const results2 = db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;')
-        if (validateResult(results2[0].values, currentQueryIndex)) {
-          flag = true
-        } else {
-          flag = false
-        }
+        flag = validateResult(results2[0].values, currentQueryIndex)
       }
     } else {
       displayResults(queryWrapper, results[0])
-      if (validateResult(results[0].values, currentQueryIndex)) {
-        flag = true
-
-      } else {
-        flag = false
-      }
+      flag = validateResult(results[0].values, currentQueryIndex)
     }
 
     if (flag) {
