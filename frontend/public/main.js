@@ -185,6 +185,7 @@ const hintPoints = [40, 60, 80]
 let db
 
 function restartGame () {
+
   queryHistory = []
   displayText.innerHTML = ''
   startTime = Date.now()
@@ -273,7 +274,7 @@ function getStory (increaseScore = true, query = '') {
     } else {
       const nextQuery = queries[nextQueryIndex]
       storyline.textContent = nextQuery
-      storyline.classList.add('chat-message-animation')
+      // storyline.classList.add('chat-message-animation')
       
       hintCounter = 0
       currentQueryIndex = nextQueryIndex
@@ -361,6 +362,13 @@ function updateProgressBar (change) {
   progress = Math.min(progress + change, 100)
   progressBar.style.width = progress + '%'
   progressText.innerText = progress + '%'
+  displayRepairRow()
+}
+
+function displayRepairRow () {
+  if (currentQueryIndex >= 9) {
+    document.getElementById('repair-row').style.display = 'table-row'
+  }
 }
 
 restartButton.addEventListener('click', restartGame)
@@ -575,7 +583,11 @@ function initializeDB () {
       .then(buffer => {
         db = new SQL.Database(new Uint8Array(buffer))
       }
-      )
+      ).then(() => {
+        if(currentQueryIndex >= 9){
+          db.exec('CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );')
+        }
+      })
   }
   )
 }
