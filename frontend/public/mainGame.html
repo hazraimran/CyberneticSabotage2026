@@ -21,6 +21,8 @@
       display: flex;
       flex-direction: row;
       justify-content: space-between;
+      height: 30%;
+      margin-top: 10px;
     }
     .chat-container{
       display: flex;
@@ -52,17 +54,18 @@
       display: flex;
       opacity: 0.8;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       margin: 20px;
     }
     .chat-content{
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: first baseline;
+      padding: 20px;
       text-align: left;
     }
     .chat-message{
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
     .chat-header h3{
       margin: 0px;
@@ -102,7 +105,50 @@
     #clear-button{
       display: none;
     }
-    
+
+    .hint-button-image{
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .hint-button-container{
+      
+      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
+      width: 100px;
+      border-color: var(--main-color);
+      border: 1px solid var(--main-color);
+      border-radius: 5px;
+      padding: 10px;
+      position: absolute;
+      top: -70px;
+      right: 10px;
+    }
+
+    .help-button-container{
+      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
+      width: 100px;
+      border-color: var(--main-color);
+      border: 1px solid var(--main-color);
+      border-radius: 5px;
+      padding: 10px;
+      position: absolute;
+      top: -70px;
+      right: 150px;
+    }
+
+    #hint-button, #help-button{
+      background-color: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-around
+    }
+
+    .query-form-area{
+      position: relative;
+    }
 
     @keyframes glow {
       from {
@@ -126,7 +172,13 @@
           </div>
 
           <div class="input-box">
-            <form id="query-form" name="query-input">
+            <form  class="query-form-area" id="query-form" name="query-input">
+              <div class="help-button-container">
+                <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"><span id="number-clues-left"></span> Tutorial</span>
+              </div>
+              <div class="hint-button-container">
+                <span type="hint" id="hint-button"><img class="hint-button-image" src="images/white-rabbit.png" alt="Hint"><span id="number-clues-left"></span> Hint</span>
+              </div>
               <div class="input-container">
                 <textarea
                   id="query-textarea"
@@ -165,12 +217,7 @@
             </div>
           </div>
 
-          <div class="button-container-1">
-            <button id="restart-button">Restart</button>
-            <button type="hint" id="hint-button">Hint</button>
-            <button id="settings-button">Settings</button>
-            <button id="end-game" onclick="endGame()">EndGame</button>
-          </div>
+
 
           <div id="sound-modal" class="modal">
             <div class="modal-content">
@@ -195,6 +242,24 @@
               </div>
             </div>
           </div>
+
+          <div class="inner-box-side">
+            <div class="chat-container">
+              <div class="chat-image">
+                <img class="trini-image super-image" src="images/trini.png" alt="Trini">
+              </div>
+              <div class="chat-content">
+                <div class="chat-header">
+                  <h3>Triny</h3>
+                </div>
+                <div class="chat-message">
+                  <p id="triny-text">Trinity Speech Text</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
 
           <table>
             <tr>
@@ -225,20 +290,13 @@
               <td class="table-data-padding">accessCode, accessLevel, lastAccess, employeeID</td>
             </tr>
           </table>
-          <div class="inner-box-side">
-            <div class="chat-container">
-              <div class="chat-image">
-                <img class="trini-image super-image" src="images/trini.png" alt="Trini">
-              </div>
-              <div class="chat-content">
-                <div class="chat-header">
-                  <h3>Triny</h3>
-                </div>
-                <div class="chat-message">
-                  <p id="triny-text">Trinity Speech Text</p>
-                </div>
-              </div>
-            </div>
+
+ 
+
+          <div class="button-container-1">
+            <button id="restart-button">Restart</button>
+            <button id="settings-button">Settings</button>
+            <button id="end-game" onclick="endGame()">EndGame</button>
           </div>
         </div>
       </div>

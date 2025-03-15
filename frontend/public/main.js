@@ -5,6 +5,7 @@ const form = document.querySelector('#query-form')
 const restartButton = document.getElementById('restart-button')
 const storyline = document.getElementById('triny-text')
 const hintButton = document.getElementById('hint-button')
+const helpButton = document.getElementById('help-button')
 const yesButton = document.getElementById('yes')
 const noButton = document.getElementById('no')
 const okayButton = document.getElementById('okay')
@@ -14,7 +15,7 @@ const progressText = document.getElementById('progress-text')
 const scoreText = document.getElementById('score')
 const endButton = document.getElementById('end-game');
 const clearButton = document.getElementById('clear-button')
-
+const numberCluesLeft = document.getElementById('number-clues-left')
 const EXTERNAL_API = window.config.EXTERNAL_API;
 
 let queryHistory = []
@@ -224,13 +225,11 @@ function startGame () {
   }
   correctQueriesSolved= parseInt(localStorage.getItem('totalQueriesSolved') ?? 0,10);
 
-  console.log({correctQueriesSolved});
   if(correctQueriesSolved > 0){
   }else{
     correctQueriesSolved=0;
     correctQueriesSolved=parseInt(correctQueriesSolved,10);
   }
-  console.log({correctQueriesSolved});
   scoreText.textContent='Score: '+score;
   document.getElementById('correct-queries').textContent = 'Q: ' + (correctQueriesSolved) + ' / 12';
   currentQueryIndex=correctQueriesSolved??0;
@@ -275,9 +274,6 @@ function getStory (increaseScore = true, query = '') {
       const nextQuery = queries[nextQueryIndex]
       storyline.textContent = nextQuery
       storyline.classList.add('chat-message-animation')
-      setTimeout(() => {
-        storyline.classList.remove('chat-message-animation')
-      }, 5000)
       
       hintCounter = 0
       currentQueryIndex = nextQueryIndex
@@ -439,6 +435,7 @@ function getHint () {
   hintsUsed++;
   subArrayLength = hintArray.length
 
+
   if (hintCounter < subArrayLength) {
     updateScore(-hintPoints[hintCounter])
     hintCounter = hintCounter + 1
@@ -493,6 +490,19 @@ hintButton.onclick = function () {
     })
   }
 }
+
+
+helpButton.onclick = function () {
+
+  Swal.fire({
+    title: 'Tutorial',
+    text: 'Tutorial',
+    icon: 'info',
+    background: '#000',
+    color: '#fff',
+  })
+}
+
 
 yesButton.onclick = function () {
   modal.style.display = 'none'
