@@ -649,6 +649,9 @@ function getStory(increaseScore = true, query = '') {
         title: 'Congratulations!',
         text: 'You have saved RoboTech. Would you like to try again?',
         icon: 'success',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'No',
         background: '#000',
         color: '#fff',
       }).then((result) => {
