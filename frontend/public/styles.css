@@ -296,10 +296,24 @@ tr:first-child > th {
   border-bottom: 1px solid var(--main-color);
 }
 
+.menu-container {
+  position:   relative;
+  top: 0;
+  left: 10;
+}
+
 .button-container-1 {
-  display: flex;
+  border-radius: 10px;
+  z-index: 1000;
+  position: absolute;
+  left: -250px;
+  display: none;
+  flex-direction: column;
   justify-content: space-between;
-  margin-bottom: 10px;
+  background-color: black;
+  padding: 20px;
+  width: 250px;
+  height: 200px;
 }
 
 .input-box,

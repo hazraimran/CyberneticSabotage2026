@@ -44,6 +44,7 @@
       width: 30px;
       height: 30px;
       margin: 0 10px;
+      cursor: pointer;
     }
 
     .super-image:hover{
@@ -211,10 +212,19 @@
         <div class="side-panel-content">
           <div class="side-panel-header">
             <h2>Cybernetic Sabotage</h2>
-            <div class="agent-name-container">
+            <div class="agent-name-container" onclick="toggleMenu()" title="Menu Hacker" tooltip="Menu Hacker">
+              <div class="menu-container">
+                <div class="button-container-1">
+                  <button id="restart-button">Restart</button>
+                  <button id="settings-button">Settings</button>
+                  <button id="end-game" onclick="endGame()">Log Out</button>
+                </div>
+              </div>
               <span id="agent-name-display"></span>
               <img class="hacker-image super-image" src="images/hacker.png" alt="Hacker Image">
             </div>
+
+          
           </div>
 
 
@@ -297,11 +307,6 @@
 
  
 
-          <div class="button-container-1">
-            <button id="restart-button">Restart</button>
-            <button id="settings-button">Settings</button>
-            <button id="end-game" onclick="endGame()">Log Out</button>
-          </div>
         </div>
       </div>
     </div>

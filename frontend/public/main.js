@@ -205,7 +205,7 @@ const EXTERNAL_API = window.config.EXTERNAL_API;
  */
 function initializeEventListeners() {
   DOM.form.addEventListener('submit', handleFormSubmit);
-  DOM.restartButton.addEventListener('click', restartGame);
+  DOM.restartButton.addEventListener('click', askForRestart);
   DOM.hintButton.onclick = yesButtonHandler;
   DOM.helpButton.onclick = getHelp;
   DOM.yesButton.onclick = yesButtonHandler;
@@ -630,6 +630,21 @@ function restartGame() {
   DOM.hintContainer.textContent = GameData.hints[0][0];
 }
 
+function askForRestart() {
+  Swal.fire({
+    title: 'Would you like to restart?',
+    icon: 'warning',
+    confirmButtonText: 'Yes',
+    showCancelButton: true,
+    cancelButtonText: 'No',
+    background: '#000',
+    color: '#fff',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      restartGame();
+    }
+  });
+}
 function endGame() {
   localStorage.clear();
   window.location.href = "login.html";
@@ -909,6 +924,11 @@ function displayMessage(queryWrapper, message) {
 
 function scrollToBottom() {
   DOM.displayText.scrollTop = DOM.displayText.scrollHeight;
+}
+
+function toggleMenu() {
+  const menu = document.querySelector(".button-container-1");
+  menu.style.display = menu.style.display === "none" || menu.style.display === "" ? "flex" : "none";
 }
 
 /**
