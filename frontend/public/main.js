@@ -253,7 +253,7 @@ function startGame () {
 function endGame(){
   
   localStorage.clear();
-  window.location.href = "index.html";
+  window.location.href = "register.html";
 }
 
 /**
