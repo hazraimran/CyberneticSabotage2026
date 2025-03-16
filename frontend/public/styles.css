@@ -399,11 +399,11 @@ form label{
 }
 
 
-.swal2-image {
+/* .swal2-image {
   border-radius: 50%;
   border: 2px solid var(--main-color);
   box-shadow: 0 0px 50px 0 rgba(0, 0, 0, 0.5);
-}
+} */
 
 .swal2-image:hover{
   transition: all 0.3s ease;

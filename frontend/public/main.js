@@ -176,6 +176,12 @@ const whiteRabbitConfiguration = {
   cancelButtonTextColor: "var(--main-color)",
   customClass: {
     actions: 'center-buttons-actions',
+    swal_image: {
+      borderRadius: "50%",
+      border: "2px solid var(--main-color)",
+      boxShadow: "0 0px 50px 0 rgba(0, 0, 0, 0.5)",
+    },
+    
   },
   toast: true,
 }
@@ -281,6 +287,20 @@ function getStory (increaseScore = true, query = '') {
       if (increaseScore) {
         correctQueriesSolved++
         updateScore(100)
+        Swal.fire({
+          title: '',
+          imageUrl: 'images/trini.png',
+          imageWidth: 50,
+          imageHeight: 50,
+          text: 'You have earned 100 points!',
+          icon: 'success',
+          background: '#000',
+          color: '#fff',
+          toast: true,  
+          position: 'top-right',
+          showConfirmButton: false,
+          timer: 3000,
+        })
       }
       updateProgressBar(8)
       
@@ -503,10 +523,12 @@ hintButton.onclick = function () {
 helpButton.onclick = function () {
 
   Swal.fire({
-    title: 'Tutorial',
-    text: 'Tutorial',
-    icon: 'info',
+    imageUrl: 'images/tutorial.png',
+    imageWidth: "100%",
+    imageHeight: "100%",
     background: '#000',
+    height: '80%',  
+    width: '80%',
     color: '#fff',
   })
 }
