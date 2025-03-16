@@ -32,7 +32,7 @@ let correctQueriesSolved = 0
 const agentName = localStorage.getItem('user')
 
 if(!agentName){
-  window.location.href = "index.html"
+  window.location.href = "register.html"
 }
 
 const queries = [
@@ -161,6 +161,9 @@ const answerKeys = [
 // Load the image prealoader
 const img = new Image();
 img.src = "images/white-rabbit.png"; 
+
+const tutorialImage = new Image();
+tutorialImage.src = "images/tutorial.png";
 
 const whiteRabbitConfiguration = {
   imageUrl: img.src,
@@ -523,7 +526,7 @@ hintButton.onclick = function () {
 helpButton.onclick = function () {
 
   Swal.fire({
-    imageUrl: 'images/tutorial.png',
+    imageUrl: tutorialImage.src,
     imageWidth: "100%",
     imageHeight: "100%",
     background: '#000',
