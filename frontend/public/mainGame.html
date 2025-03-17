@@ -141,7 +141,44 @@
       right: 150px;
     }
 
-    #hint-button, #help-button{
+    .sql-button-container{
+      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
+      width: 100px;
+      border-color: var(--main-color);
+      border: 1px solid var(--main-color);
+      border-radius: 5px;
+      padding: 10px;
+      position: absolute;
+      top: -70px;
+      right: 290px;
+    }
+
+    #sql-commands-explanation{
+      padding: 10px;
+      border-top: 1px solid var(--main-color);
+    }
+
+    #sql-commands {
+      list-style-type: none;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    #sql-commands li{
+      padding: 10px;
+      text-decoration: none;
+      background-color: black;
+      border-radius: 5px;
+      margin: 10px;
+      cursor: pointer;
+      border: 1px solid var(--main-color);
+    }
+
+    .modal-content{
+      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
+    }
+
+    #hint-button, #help-button, #sql-button{
       background-color: transparent;
       cursor: pointer;
       display: flex;
@@ -184,6 +221,9 @@
 
           <div class="input-box">
             <form  class="query-form-area" id="query-form" name="query-input">
+              <div class="sql-button-container">
+                <span type="hint" id="sql-button" onclick="LoadSqlCommands()"><img class="hint-button-image" src="images/hacker.png" alt="Hint"><span id="number-clues-left"></span> Cheat Sheet</span>
+              </div>
               <div class="help-button-container">
                 <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"><span id="number-clues-left"></span> Tutorial</span>
               </div>
@@ -218,6 +258,18 @@
         </div>
       </div>
 
+      <div id="sql-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="toggleSql()">&times;</span>
+          <p id="modal-content" style="color: white;">These are the SQL commands you should know to complete this request:</p>
+          <ul id="sql-commands">
+          </ul>
+          <div id="sql-commands-explanation">
+      
+          </div>
+        </div>
+      </div>
+
       <div class="side-panel">
         <div class="side-panel-content">
           <div class="side-panel-header">
@@ -227,6 +279,7 @@
                 <div class="button-container-1">
                   <button id="restart-button">Restart</button>
                   <button id="settings-button">Settings</button>
+                  <button id="all-keys-button" onclick="LoadSqlCommands(true)">Show SQL Commands</button>
                   <button id="end-game" onclick="endGame()">Log Out</button>
                 </div>
               </div>
@@ -275,6 +328,7 @@
               <div class="chat-content inner-box-side">
                 <div class="chat-header">
                   <h3>Triny</h3>
+                
                 </div>
                 <div class="chat-message">
                   <p id="triny-text">Trinity Speech Text</p>

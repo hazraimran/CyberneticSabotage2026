@@ -72,7 +72,9 @@ const DOM = {
   correctQueries: document.getElementById('correct-queries'),
   settingsButton: document.getElementById('settings-button'),
   soundButton: document.getElementById('sound-on-button'),
-  soundOffButton: document.getElementById('sound-off-button')
+  soundOffButton: document.getElementById('sound-off-button'),
+  sqlCommands: document.getElementById('sql-commands'),
+  sqlExplanation: document.getElementById('sql-commands-explanation')
 };
 
 /**
@@ -212,6 +214,29 @@ const GameData = {
 ]
 };
 
+
+const SQL_COMMANDS_HTML = {
+  "SELECT": "<div><h4>SELECT</h4> <span>The <strong>SELECT</strong> statement is used to retrieve data from a database. It specifies which columns to return and from which table.<br><br><strong>Example 1:</strong><br><code>SELECT firstName, lastName FROM Employees;</code><br><br><strong>Example 2:</strong><br><code>SELECT * FROM Orders WHERE orderDate > '2023-01-01';</code></span></div>",
+  "UPDATE": "<div><h4>UPDATE</h4> <span>The <strong>UPDATE</strong> statement is used to modify existing records in a table.<br><br><strong>Example 1:</strong><br><code>UPDATE Employees SET Salary = 60000 WHERE EmployeeID = 3;</code><br><br><strong>Example 2:</strong><br><code>UPDATE Orders SET Status = 'Shipped' WHERE OrderID = 101;</code></span></div>",
+  "DELETE": "<div><h4>DELETE FROM</h4> <span>The <strong>DELETE FROM</strong> statement is used to remove records from a table.<br><br><strong>Example 1:</strong><br><code>DELETE FROM Customers WHERE CustomerID = 5;</code><br><br><strong>Example 2:</strong><br><code>DELETE FROM Orders WHERE OrderDate < '2022-01-01';</code></span></div>",
+  "JOIN": "<div><h4>JOIN</h4> <span>The <strong>JOIN</strong> statement is used to combine rows from two or more tables based on a related column.<br><br><strong>Example 1:</strong><br><code>SELECT Orders.OrderID, Customers.CustomerName FROM Orders JOIN Customers ON Orders.CustomerID = Customers.CustomerID;</code><br><br><strong>Example 2:</strong><br><code>SELECT Employees.Name, Departments.DepartmentName FROM Employees JOIN Departments ON Employees.DepartmentID = Departments.DepartmentID;</code></span></div>",
+  "LEFT JOIN": "<div><h4>LEFT JOIN</h4> <span>The <strong>LEFT JOIN</strong> returns all records from the left table and the matched records from the right table. If no match is found, NULL values are returned.<br><br><strong>Example 1:</strong><br><code>SELECT Customers.CustomerName, Orders.OrderID FROM Customers LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID;</code><br><br><strong>Example 2:</strong><br><code>SELECT Employees.Name, Departments.DepartmentName FROM Employees LEFT JOIN Departments ON Employees.DepartmentID = Departments.DepartmentID;</code></span></div>",
+  "AS": "<div><h4>AS</h4> <span>The <strong>AS</strong> keyword is used to rename a column or table with an alias.<br><br><strong>Example 1:</strong><br><code>SELECT firstName AS First_Name, lastName AS Last_Name FROM Employees;</code><br><br><strong>Example 2:</strong><br><code>SELECT COUNT(*) AS TotalOrders FROM Orders;</code></span></div>",
+  "BY": "<div><h4>BY</h4> <span>The <strong>BY</strong> keyword is commonly used in GROUP BY and ORDER BY clauses to organize or sort query results.<br><br><strong>Example 1:</strong><br><code>SELECT Department, COUNT(*) FROM Employees GROUP BY Department;</code><br><br><strong>Example 2:</strong><br><code>SELECT firstName, lastName FROM Employees ORDER BY lastName;</code></span></div>",
+  "COUNT": "<div><h4>COUNT</h4> <span>The <strong>COUNT</strong> function returns the number of rows matching a specified condition.<br><br><strong>Example 1:</strong><br><code>SELECT COUNT(*) FROM Employees;</code><br><br><strong>Example 2:</strong><br><code>SELECT COUNT(OrderID) FROM Orders WHERE Status = 'Shipped';</code></span></div>",
+  "ORDER": "<div><h4>ORDER</h4> <span>The <strong>ORDER BY</strong> clause sorts query results in ascending (default) or descending order.<br><br><strong>Example 1:</strong><br><code>SELECT firstName, lastName FROM Employees ORDER BY lastName;</code><br><br><strong>Example 2:</strong><br><code>SELECT * FROM Orders ORDER BY TotalAmount DESC;</code></span></div>",
+  "LIMIT": "<div><h4>LIMIT</h4> <span>The <strong>LIMIT</strong> clause restricts the number of rows returned by a query.<br><br><strong>Example 1:</strong><br><code>SELECT * FROM Orders LIMIT 10;</code><br><br><strong>Example 2:</strong><br><code>SELECT firstName, lastName FROM Employees ORDER BY lastName LIMIT 5;</code></span></div>",
+  "WHERE": "<div><h4>WHERE</h4> <span>The <strong>WHERE</strong> clause filters records based on a specified condition.<br><br><strong>Example 1:</strong><br><code>SELECT * FROM Employees WHERE Salary > 50000;</code><br><br><strong>Example 2:</strong><br><code>SELECT * FROM Orders WHERE Status = 'Pending';</code></span></div>",
+  "ORDER BY": "<div><h4>ORDER BY</h4> <span>The <strong>ORDER BY</strong> clause is used to sort the result set in ascending (ASC) or descending (DESC) order.<br><br><strong>Example 1:</strong><br><code>SELECT firstName, lastName FROM Employees ORDER BY lastName ASC;</code><br><br><strong>Example 2:</strong><br><code>SELECT * FROM Orders ORDER BY TotalAmount DESC;</code></span></div>",
+  "DISTINCT": "<div><h4>DISTINCT</h4> <span>The <strong>DISTINCT</strong> keyword removes duplicate values from query results.<br><br><strong>Example 1:</strong><br><code>SELECT DISTINCT Department FROM Employees;</code><br><br><strong>Example 2:</strong><br><code>SELECT DISTINCT Country FROM Customers;</code></span></div>",
+  "CREATE VIEW": "<div><h4>CREATE VIEW</h4> <span>The <strong>CREATE VIEW</strong> statement creates a virtual table based on a SELECT query.<br><br><strong>Example 1:</strong><br><code>CREATE VIEW HighSalaries AS SELECT Name, Salary FROM Employees WHERE Salary > 70000;</code><br><br><strong>Example 2:</strong><br><code>CREATE VIEW OrderSummary AS SELECT OrderID, CustomerID, TotalAmount FROM Orders;</code></span></div>",
+  "HAVING COUNT": "<div><h4>HAVING COUNT</h4> <span>The <strong>HAVING COUNT</strong> clause filters groups based on an aggregate function.<br><br><strong>Example 1:</strong><br><code>SELECT Department, COUNT(*) FROM Employees GROUP BY Department HAVING COUNT(*) > 5;</code><br><br><strong>Example 2:</strong><br><code>SELECT ProductID, COUNT(*) FROM Orders GROUP BY ProductID HAVING COUNT(*) > 10;</code></span></div>",
+  "CREATE TABLE": "<div><h4>CREATE TABLE</h4> <span>The <strong>CREATE TABLE</strong> statement is used to define a new table in the database.<br><br><strong>Example 1:</strong><br><code>CREATE TABLE Employees (EmployeeID INT PRIMARY KEY, Name VARCHAR(100), Salary DECIMAL(10,2));</code><br><br><strong>Example 2:</strong><br><code>CREATE TABLE Orders (OrderID INT PRIMARY KEY, CustomerID INT, TotalAmount DECIMAL(10,2));</code></span></div>",
+  "INSERT INTO": "<div><h4>INSERT INTO</h4> <span>The <strong>INSERT INTO</strong> statement is used to insert new rows into a table.<br><br><strong>Example 1:</strong><br><code>INSERT INTO Customers (CustomerName, ContactName, Country) VALUES ('John Doe', 'John', 'USA');</code><br><br><strong>Example 2:</strong><br><code>INSERT INTO Products (ProductName, Price) VALUES ('Laptop', 999.99);</code></span></div>",
+  "MAX": "<div><h4>MAX</h4> <span>The <strong>MAX</strong> function returns the highest value in a specified column.<br><br><strong>Example 1:</strong><br><code>SELECT MAX(Salary) FROM Employees;</code><br><br><strong>Example 2:</strong><br><code>SELECT MAX(TotalAmount) FROM Sales;</code></span></div>"
+}
+
+
 const EXTERNAL_API = window.config.EXTERNAL_API;
 
 /**
@@ -245,6 +270,11 @@ function initializeEventListeners() {
         color: '#fff',
       })
       DOM.textarea.value = '';
+    }
+  });
+  DOM.sqlCommands.addEventListener('click', (e) => {
+    if (e.target.tagName === 'LI') {
+      DOM.sqlExplanation.innerHTML = SQL_COMMANDS_HTML[e.target.textContent];
     }
   });
 }
@@ -446,7 +476,34 @@ function updateTimer() {
 
 function toggleSound() {
   const modal = document.getElementById('sound-modal');
-  modal.style.display = 'block';
+  modal.style.display == 'block' ? modal.style.display = 'none' : modal.style.display = 'block';
+}
+
+
+function LoadSqlCommands(allKeys = false) {
+  
+  const currentGroup = allKeys ? null : GameData.queryAnswers[GameState.currentQueryIndex];
+  const source = extractSqlKeywords(currentGroup);
+  DOM.sqlCommands.innerHTML = '';
+  DOM.sqlExplanation.innerHTML = '';
+  for (const command of source) {
+    const li = document.createElement('li');
+    li.textContent = command.toUpperCase();
+    DOM.sqlCommands.appendChild(li);
+  }
+  toggleSql();
+}
+
+function extractSqlKeywords(query = null) {
+
+  const sqlCommands = Object.keys(SQL_COMMANDS_HTML);
+  const extractedKeywords = query ? sqlCommands.filter(keyword => query.toUpperCase().includes(keyword.toUpperCase())) : sqlCommands;
+  return extractedKeywords;
+}
+
+function toggleSql() {
+  const modal = document.getElementById('sql-modal');
+  modal.style.display == 'block' ? modal.style.display = 'none' : modal.style.display = 'block';
 }
 
 function setSoundOff() {
@@ -562,6 +619,11 @@ window.onclick = function (event) {
   if (event.target === modal) {
     modal.style.display = 'none';
   }
+}
+
+function sqlButtonHandler() {
+  const modal = document.getElementById('sql-modal');
+  modal.style.display = 'block';
 }
 
 function clearQuery() {
