@@ -104,12 +104,12 @@ const GameData = {
   " We're onto something! Count the number of incidents reported for each robot model. Return the robot model and the number of incidents as 'IncidentCount'.",
   " Time to check our system updates. Count how many robots have been updated in the past week (Assume today is 2023-07-24). Return this count as 'NumberOfUpdatedRobots'.",
   " Who's been fixing our robots? Identify employees who recently updated any robots within the past week. We want to know their employee ID, first name, and last name (Assume today is 2023-07-24).",
-  " Some robots need urgent repairs! Mark the recently updated robots as 'Under Repair' and then display all robot details (Assume today is 2023-07-24).",
+  " Some robots need urgent repairs! Mark the recently updated robots as 'Under Repair' and then SELECT ALL robot details (Assume today is 2023-07-24).",
   " Who's our top whistleblower? Find the employee who has the most robot update records. Display the result with column names 'employeeID' and 'NumberOfIncidents' respectively.",
   " Let's compile all the evidence. Create a view that connects the 'Incident' and 'Robot' tables, showing all incidents related to each robot model. Include the robot ID, model, employee who last updated it, incident ID, incident description, incident timestamp, and the name of the employee responsible for the update. Then, display the view.",
   " Let's uncover the problematic robot models! Find all models that have been involved in more than 2 incidents. Return only the model names.",
-  " We need a repair log! Create a 'Repair' table with columns for repair ID((INTEGER), repairStatus (TEXT), desc(TEXT), robotID(TEXT),  and the employee who performed the repair as and repairedById (TEXT)",
-  " Time to record a repair case. Insert a new repair record with the given details into the 'Repair' table. (repairID = 1, repairStatus = 'Under Repair', desc = 'This robot model is undergoing repair due to its defaulty patterns', robotID = 5, repairedById = 7)",
+  " We need a repair log! Create a 'Repair' table with columns for repairID(INTEGER), repairStatus (TEXT), desc(TEXT), robotID(INTEGER),  and the employee who performed the repair as repairedById (INTEGER)",
+  " Time to record a repair case. Insert a new repair record with the given details into the 'Repair' table. (repairID = 1, repairStatus = 'Under Repair', desc = 'This robot model is undergoing repair due to its defaulty patterns', robotID = 5, repairedById = 7) and SELECT ALL repair details",
   " Who last worked on the faulty robots? Identify the most recent employee who updated the software of malfunctioning robots. Return their employee ID, first name, last name, the timestamp of the last update, and the robot ID they updated."
   ],
   queryAnswers: [
@@ -118,12 +118,12 @@ const GameData = {
   'SELECT r.Model, COUNT(i.incidentID) AS IncidentCount FROM Robot AS r LEFT JOIN Incident AS i ON r.robotID = i.robotID GROUP BY r.Model;',
   'SELECT COUNT(DISTINCT robotID) AS NumberOfUpdatedRobots FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\';',
   'SELECT DISTINCT e.employeeID, e.firstName, e.lastName FROM Employee e WHERE e.employeeID IN ( SELECT DISTINCT lastUpdatedByEmpID FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\' );',
-  'UPDATE Robot SET status = \'Under Repair\' WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\';',
+  'UPDATE Robot SET status = \'Under Repair\' WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\'; SELECT * FROM Robot;',
   'SELECT lastUpdatedByEmpID AS employeeID, COUNT(*) AS NumberOfIncidents FROM Robot GROUP BY lastUpdatedByEmpID ORDER BY COUNT(*) DESC LIMIT 1;',
   'CREATE VIEW RobotIncidentView AS SELECT r.robotID, r.Model, r.lastUpdatedByEmpID, i.incidentID, i.desc, i.timeStamp, e.firstName, e.lastName FROM Robot r JOIN Incident i ON r.robotID = i.robotID JOIN Employee e ON r.lastUpdatedByEmpID = e.employeeID; SELECT * FROM RobotIncidentView;',
   'SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );',
   'CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );',
-  'INSERT INTO Repair ("repairID", "repairStatus", "desc", "robotID", "repairedById" ) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7);', 
+  'INSERT INTO Repair ("repairID", "repairStatus", "desc", "robotID", "repairedById" ) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7); SELECT * FROM Repair;', 
   'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'In Repair\';'
   ],
   hints: [
@@ -778,6 +778,8 @@ function updateScore(change) {
 function validateResult(resultValues, queryIndex) {
   const answerKey = GameData.answerKeys[queryIndex];
 
+  console.log(resultValues, answerKey, queryIndex);
+
   if (!answerKey || resultValues.length !== answerKey.length) {
     return false;
   }
@@ -827,12 +829,17 @@ async function initializeDB() {
 function executeQuery(query, index, queryWrapper) {
   try {
     const results = GameState.db.exec(query);
+
+    console.log(results, query);
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.');
       console.log(GameState.currentQueryIndex);
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
+      } else {
+        GameState.flag = validateResult('', GameState.currentQueryIndex)
+        console.log(GameState.flag);
       }
     } else {
       displayResults(queryWrapper, results[0]);
