@@ -64,6 +64,9 @@
       justify-content: first baseline;
       padding: 20px;
       text-align: left;
+      margin-top: 60px;
+      margin-left: -40px;
+      
     }
     .chat-message{
       font-size: 1rem;
@@ -163,6 +166,13 @@
                      0 0 60px var(--main-color);
       }
     }
+
+    #trini-name{
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--main-color);
+
+    }
   </style>
   <body>
     <div class="container">
@@ -256,12 +266,13 @@
             </div>
           </div>
 
-          <div class="inner-box-side">
+          <div class="">
             <div class="chat-container">
               <div class="chat-image">
-                <img class="trini-image super-image" src="images/trini.png" alt="Trini">
+                <img class="trini-image super-image" src="images/trini.png" alt="Trini" onclick="getHelp()" style="cursor: pointer;" title="Help">
+                <span id="trini-name">?</span>
               </div>
-              <div class="chat-content">
+              <div class="chat-content inner-box-side">
                 <div class="chat-header">
                   <h3>Triny</h3>
                 </div>

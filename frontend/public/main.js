@@ -1,3 +1,18 @@
+
+const ImagesLoader = {
+  "hacker": "images/hacker.png",
+  "trini": "images/trini.png",
+  "white-rabbit": "images/white-rabbit.png",
+  "tutorial": "images/tutorial.png",
+}
+
+// Preload images
+Object.keys(ImagesLoader).forEach(key => {
+  const img = new Image();
+  img.src = ImagesLoader[key];
+});
+
+
 /* global initSqlJs */
 /**
  * Game Configuration object containing all initial game settings and white rabbit modal configuration
@@ -8,7 +23,7 @@ const GAME_CONFIG = {
   initialProgress: 10,
   hintPoints: [40, 60, 80],
   whiteRabbitConfig: {
-    imageUrl: "images/white-rabbit.png",
+    imageUrl: ImagesLoader["white-rabbit"],
     imageWidth: 200,
     imageHeight: 200,
     background: "linear-gradient(to right, #000, green)",
@@ -419,9 +434,7 @@ function displayMessage(queryWrapper, message) {
 }
 
 function displayRepairRow() {
-  if (GameState.currentQueryIndex >= 9) {
-    document.getElementById('repair-row').style.display = 'table-row';
-  }
+  document.getElementById('repair-row').style.display =  GameState.currentQueryIndex > 9 ? 'table-row' : 'none';
 }
 
 function updateTimer() {
@@ -430,23 +443,6 @@ function updateTimer() {
   document.getElementById('timer').textContent = 'Time: ' + timeElapsed + 's';
 }
 
-/**
- * Updates the game score and plays appropriate sound
- * @function
- * @param {number} change - The amount to change the score by
- */
-function updateScore(change) {
-  GameState.score += change;
-  DOM.scoreText.textContent = 'Score: ' + GameState.score;
-  DOM.correctQueries.textContent = 'Q: ' + (GameState.correctQueriesSolved + 1) + ' / 12';
-
-  if (change > 0 && GameState.soundEnabled) {
-    SoundManager.playSound('correct');
-  }
-  if (change < 0 && GameState.soundEnabled) {
-    SoundManager.playSound('incorrect');
-  }
-}
 
 function toggleSound() {
   const modal = document.getElementById('sound-modal');
@@ -486,7 +482,6 @@ function getHint() {
   const hintIndex = GameState.currentQueryIndex;
   const hintArray = GameData.hints[hintIndex];
   GameState.hintsUsed++;
-  GameState.hintCounter = 0;
 
   if (GameState.hintCounter < hintArray.length) {
     updateScore(-GAME_CONFIG.hintPoints[GameState.hintCounter]);
@@ -497,7 +492,7 @@ function getHint() {
 
 function getHelp() {
   Swal.fire({
-    imageUrl: "images/tutorial.png",
+    imageUrl: ImagesLoader["tutorial"],
     imageWidth: "100%",
     imageHeight: "100%",
     background: '#000',
@@ -518,6 +513,7 @@ function yesButtonHandler() {
     }).then((result) => {
       if (result.isConfirmed) {
         const hint_array = getHint();
+
         const formatted_hint = hint_array.slice(0, GameState.hintCounter).map((hint, index) => {
           if (GameState.hintCounter-1 === index) {
             return `<span style="color: white;">${index + 1}. ${hint}</span>`
@@ -582,6 +578,7 @@ function getAgentName() {
 }
 
 function startGame() {
+
   GameState.startTime = Date.now();
   let score = localStorage.getItem('score');
   let agentName = getAgentName();
@@ -593,8 +590,9 @@ function startGame() {
     score = 150;
       score = parseInt(score, 10); // Convert score back to a number if it's stored as a string
   }
-  GameState.correctQueriesSolved = parseInt(localStorage.getItem('totalQueriesSolved') ?? 0, 10);
 
+  GameState.correctQueriesSolved = parseInt(localStorage.getItem('totalQueriesSolved') ?? 0, 10);
+  GameState.score = score;
   if (GameState.correctQueriesSolved > 0) {
   } else {
     GameState.correctQueriesSolved = 0;
@@ -620,14 +618,16 @@ function restartGame() {
   GameState.score = GAME_CONFIG.initialScore;
   GameState.progress = GAME_CONFIG.initialProgress;
   GameState.correctQueriesSolved = 0;
-  updateTimer();
-  updateScore(0);
-  updateProgressBar(0);
-  initializeDB();
   DOM.storyline.textContent = GameData.queries[0];
   GameState.currentQueryIndex = 0;
   GameState.hintCounter = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
+
+  setGameConfiguration(0, 150);
+  updateTimer();
+  updateScore(0);
+  updateProgressBar(0);
+  initializeDB();
 }
 
 function askForRestart() {
@@ -684,9 +684,10 @@ function getStory(increaseScore = true, query = '') {
       if (increaseScore) {
         GameState.correctQueriesSolved++;
         updateScore(100);
+        GameState.hintCounter = 0;
         Swal.fire({
           title: '',
-          imageUrl: 'images/trini.png',
+          imageUrl: ImagesLoader["trini"],
           imageWidth: 50,
           imageHeight: 50,
           text: 'You have earned 100 points!',
@@ -694,9 +695,11 @@ function getStory(increaseScore = true, query = '') {
           background: '#000',
           color: '#fff',
           toast: true,  
-          position: 'top-right',
+          position: 'bottom-right',
           showConfirmButton: false,
           timer: 3000,
+        }).then(() => {
+          setGameConfiguration(GameState.correctQueriesSolved, GameState.score);
         });
       }
       updateProgressBar(8);
@@ -763,35 +766,7 @@ function updateScore(change) {
   }
 }
 
-function toggleSound() {
-  const modal = document.getElementById('sound-modal');
-  modal.style.display = 'block';
-}
 
-function setSoundOff() {
-  GameState.soundEnabled = false;
-  const modal = document.getElementById('sound-modal');
-  modal.style.display = 'none';
-}
-
-function setSoundOn() {
-  GameState.soundEnabled = true;
-  const modal = document.getElementById('sound-modal');
-  modal.style.display = 'none';
-}
-
-function updateProgressBar(change) {
-  GameState.progress = Math.min(GameState.progress + change, 100);
-  DOM.progressBar.style.width = GameState.progress + '%';
-  DOM.progressText.innerText = GameState.progress + '%';
-  displayRepairRow();
-}
-
-function displayRepairRow() {
-  if (GameState.currentQueryIndex >= 9) {
-    document.getElementById('repair-row').style.display = 'table-row';
-  }
-}
 
 /**
  * Validates the query result against the answer key
@@ -835,7 +810,7 @@ async function initializeDB() {
         GameState.db = new SQL.Database(new Uint8Array(buffer));
       })
       .then(() => {
-        if (GameState.currentQueryIndex >= 9) {
+        if (GameState.currentQueryIndex > 9) {
           GameState.db.exec('CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );');
         }
       });
@@ -854,6 +829,7 @@ function executeQuery(query, index, queryWrapper) {
     const results = GameState.db.exec(query);
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.');
+      console.log(GameState.currentQueryIndex);
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
@@ -916,22 +892,20 @@ function displayResults(queryWrapper, result) {
   queryWrapper.appendChild(table);
 }
 
-function displayMessage(queryWrapper, message) {
-  const p = document.createElement('p');
-  p.textContent = message;
-  queryWrapper.appendChild(p);
-}
-
-function scrollToBottom() {
-  DOM.displayText.scrollTop = DOM.displayText.scrollHeight;
-}
 
 function toggleMenu() {
   const menu = document.querySelector(".button-container-1");
   menu.style.display = menu.style.display === "none" || menu.style.display === "" ? "flex" : "none";
 }
 
+function setGameConfiguration(totalQueriesSolved, score) {
+  localStorage.setItem("totalQueriesSolved", totalQueriesSolved);
+  localStorage.setItem("score", score);
+}
+
 /**
  * Starts the game initialization process
  */
 initializeGame();
+
+
