@@ -778,11 +778,13 @@ function updateScore(change) {
 function validateResult(resultValues, queryIndex) {
   const answerKey = GameData.answerKeys[queryIndex];
 
-  console.log(resultValues, answerKey, queryIndex);
-
   if (!answerKey || resultValues.length !== answerKey.length) {
     return false;
   }
+
+  // Sort both arrays for consistent comparison
+  resultValues.sort((a, b) => a.join() < b.join() ? -1 : 1);
+  answerKey.sort((a, b) => a.join() < b.join() ? -1 : 1);
 
   for (let i = 0; i < resultValues.length; i++) {
     for (let j = 0; j < resultValues[i].length; j++) {
