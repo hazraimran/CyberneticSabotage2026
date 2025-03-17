@@ -856,48 +856,7 @@ function executeQuery(query, index, queryWrapper) {
   scrollToBottom();
 }
 
-function displayError(queryWrapper, message) {
-  const errorElement = document.createElement('p');
-  errorElement.textContent = message;
-  errorElement.style.color = 'red';
-  queryWrapper.appendChild(errorElement);
-  scrollToBottom();
-}
 
-function displayResults(queryWrapper, result) {
-  const table = document.createElement('table');
-  table.style.borderCollapse = 'collapse';
-  table.style.width = '100%';
-  const thead = document.createElement('thead');
-  const tbody = document.createElement('tbody');
-  let headers = null;
-  result.values.forEach((row, rowIndex) => {
-    if (!headers) {
-      headers = result.columns;
-      const headerRow = document.createElement('tr');
-      headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        th.style.border = '1px solid';
-        th.style.padding = '8px';
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-    }
-    const dataRow = document.createElement('tr');
-    headers.forEach(header => {
-      const td = document.createElement('td');
-      td.textContent = result.values[rowIndex][headers.indexOf(header)];
-      td.style.border = '1px solid';
-      td.style.padding = '8px';
-      dataRow.appendChild(td);
-    });
-    tbody.appendChild(dataRow);
-  });
-  table.appendChild(thead);
-  table.appendChild(tbody);
-  queryWrapper.appendChild(table);
-}
 
 
 function toggleMenu() {
