@@ -27,7 +27,6 @@ const sceneText = [['The Digital Age',
   ['','']
 ]
 
-document.getElementById('begin-button').addEventListener('click', beginGame)
 
 function nextScene () {
   if (currentScene === sceneText.length - 1) return

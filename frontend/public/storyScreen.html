@@ -155,7 +155,11 @@
 
       <div id="scene-area-container">
         <div id="scene-area">
+          
           <h1 id="scene-title"></h1>
+          <div id="arrow-left-disabled" onclick="beginGame()" style="cursor: pointer;">
+            <span>Skip</span>
+          </div>
           <p id="scene-text"></p>
           <div id="arrow-container">
             <div id="arrow-left" style="display: none;" onclick="previousScene()">
@@ -167,7 +171,7 @@
           </div>
           <div id="button-container" style="display: none;">
             <h1>Are you ready?</h1>
-            <button id="begin-button">Begin</button>
+            <button id="begin-button" onclick="beginGame()">Begin</button>
           </div>
         </div>  
         <div id="agent-info" title="Menu Hacker" tooltip="Menu Hacker">
