@@ -831,17 +831,15 @@ async function initializeDB() {
 function executeQuery(query, index, queryWrapper) {
   try {
     const results = GameState.db.exec(query);
-
-    console.log(results, query);
+    console.log({results});
+  
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.');
-      console.log(GameState.currentQueryIndex);
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
       } else {
         GameState.flag = validateResult('', GameState.currentQueryIndex)
-        console.log(GameState.flag);
       }
     } else {
       displayResults(queryWrapper, results[0]);
