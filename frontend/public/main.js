@@ -102,17 +102,17 @@ const GameState = {
 const GameData = {
   queries: [
   " Detective, your first mission is to retrieve all reported incidents from the 'Incident' database. Let's see what we're dealing with!",
-  " Great job! Now, let's track down the most recent incident. Find the latest reported case from the 'Incident' table. Make sure to return all its details.",
-  " We're onto something! Count the number of incidents reported for each robot model. Return the robot model and the number of incidents as 'IncidentCount'.",
+  " Great job, Detective! Now, let's track down the most recent incident. Retrieve the latest reported case from the <strong>Incident</strong> table and display all its details. Stay sharp!",
+  " We're closing in! Identify which robot models have been involved in incidents. Count the number of incidents per model and return only two values: the robot model and the incident count (<strong>IncidentCount</strong>). Make sure to include all robot models, even those with zero incidents.",
   " Time to check our system updates. Count how many robots have been updated in the past week (Assume today is 2023-07-24). Return this count as 'NumberOfUpdatedRobots'.",
   " Who's been fixing our robots? Identify employees who recently updated any robots within the past week. We want to know their employee ID, first name, and last name (Assume today is 2023-07-24).",
-  " Some robots need urgent repairs! Mark the recently updated robots as 'Under Repair' and then SELECT ALL robot details (Assume today is 2023-07-24).",
-  " Who's our top whistleblower? Find the employee who has the most robot update records. Display the result with column names 'employeeID' and 'NumberOfIncidents' respectively.",
-  " Let's compile all the evidence. Create a view that connects the 'Incident' and 'Robot' tables, showing all incidents related to each robot model. Include the robot ID, model, employee who last updated it, incident ID, incident description, incident timestamp, and the name of the employee responsible for the update. Then, display the view.",
+  " Some robots need urgent repairs! First, update all robots that were serviced in the past 7 days  by setting their status to <strong>'Under Repair'</strong>. Then, retrieve and display all robot details.  (Assume today is 2023-07-24)",
+  " Who's our top whistleblower? Identify the employee with the most robot updates. If multiple employees have the same number, return any one of them. Display <strong>employeeID</strong> and <strong>NumberOfIncidents</strong>.",
+  " Let's compile all the evidence! Create a view, <strong>RobotIncidentView</strong>, that links robots to their incidents. Show the robot ID, model, last updated by (employee ID), incident ID, description, timestamp, and the name of the employee responsible for the update. Then, display the view.",
   " Let's uncover the problematic robot models! Find all models that have been involved in more than 2 incidents. Return only the model names.",
-  " We need a repair log! Create a 'Repair' table with columns for repairID(INTEGER), repairStatus (TEXT), desc(TEXT), robotID(INTEGER),  and the employee who performed the repair as repairedById (INTEGER)",
-  " Time to record a repair case. Insert a new repair record with the given details into the 'Repair' table. (repairID = 1, repairStatus = 'Under Repair', desc = 'This robot model is undergoing repair due to its defaulty patterns', robotID = 5, repairedById = 7) and SELECT ALL repair details",
-  " Who last worked on the faulty robots? Identify the most recent employee who updated the software of malfunctioning robots. Return their employee ID, first name, last name, the timestamp of the last update, and the robot ID they updated."
+  " We need a repair log! Create a <strong>Repair</strong> table to track all robot repairs. Include columns for <strong>repairID</strong> (INTEGER), <strong>repairStatus</strong> (TEXT), <strong>desc</strong> (TEXT), <strong>robotID</strong> (INTEGER), and <strong>repairedById</strong> (INTEGER) to record the employee responsible for the repair.",
+  " Time to record a repair case! Insert a new repair record into the <strong>Repair</strong> table with the provided details. Use the given values for <strong>repairID</strong>, <strong>repairStatus</strong>, <strong>desc</strong>, <strong>robotID</strong>, and <strong>repairedById</strong>.",
+  " Who last worked on the faulty robots? Identify the most recent employee who updated the software of robots currently marked as <strong>'In Repair'</strong>. Return their <strong>employeeID, first name, last name, timestamp</strong> of the last update, and the <strong>robotID</strong> they updated."
   ],
   queryAnswers: [
   'SELECT * FROM Incident;',
@@ -312,8 +312,6 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
   }
 
   const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score };
-
-  console.log(payload);
   try {
     const response = await fetch(`${EXTERNAL_API}/users/submitUserData`, {
       method: 'POST',
@@ -666,7 +664,7 @@ function startGame() {
   GameState.currentQueryIndex = GameState.correctQueriesSolved ?? 0;
   const nextQueryIndex = GameState.currentQueryIndex ?? 0;
   const nextQuery = GameData.queries[nextQueryIndex];
-  DOM.storyline.textContent = nextQuery;
+  appendStoryline(nextQuery);
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
   updateScore(0);
@@ -681,7 +679,7 @@ function restartGame() {
   GameState.score = GAME_CONFIG.initialScore;
   GameState.progress = GAME_CONFIG.initialProgress;
   GameState.correctQueriesSolved = 0;
-  DOM.storyline.textContent = GameData.queries[0];
+  appendStoryline(GameData.queries[0]);
   GameState.currentQueryIndex = 0;
   GameState.hintCounter = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
@@ -741,7 +739,7 @@ function getStory(increaseScore = true, query = '') {
       });
     } else {
       const nextQuery = GameData.queries[nextQueryIndex];
-      DOM.storyline.textContent = nextQuery;
+      appendStoryline(nextQuery);
       DOM.hintCounter = 0;
       GameState.currentQueryIndex = nextQueryIndex;
       if (increaseScore) {
@@ -771,7 +769,7 @@ function getStory(increaseScore = true, query = '') {
     const currentQuery = GameData.queries[GameState.currentQueryIndex];
     
     if (!isSelectQuery(query)) {
-      DOM.storyline.textContent = 'Oops! Please try again.' + currentQuery;
+      appendStoryline('Oops! Please try again.' + currentQuery);
       updateScore(-10);
     }
 
@@ -930,6 +928,12 @@ function toggleMenu() {
 function setGameConfiguration(totalQueriesSolved, score) {
   localStorage.setItem("totalQueriesSolved", totalQueriesSolved);
   localStorage.setItem("score", score);
+}
+
+function appendStoryline(text) {
+  // Escape special characters to render correctly in HTML
+  text = text.replace(/'/g, '&#39;');
+  DOM.storyline.innerHTML = text;
 }
 
 /**
