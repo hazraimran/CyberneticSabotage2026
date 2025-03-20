@@ -1,6 +1,9 @@
 :root {
   --main-color: lime;
   --secondary-color: green;
+  --constraint-color: #0099FF;
+  --constraint-color-dark: #006699;
+  --button-color: rgb(94, 31, 130);
 }
 
 body {
@@ -269,7 +272,6 @@ button {
 table {
   border-collapse: collapse;
   border: 1px solid var(--main-color);
-  margin: auto;
 }
 
 th {

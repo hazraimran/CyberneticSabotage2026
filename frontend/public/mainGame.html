@@ -7,19 +7,19 @@
 
   <style>
     #end-game{
-      background-color: rgb(94, 31, 130);
+      background-color: var(--button-color);
       color: white;
-      border-color: rgb(94, 31, 130);
+      border-color: var(--button-color);
       transition: color .3s linear,background-color .3s linear,border-color .3s linear;
     }
     #end-game:hover{
       background-color: white;
-      color: rgb(94, 31, 130);
+      color: var(--button-color);
       
     }
 
     .red-text, strong{
-      color: gold !important;
+      color: var(--constraint-color) !important;
       font-weight: bold;
       text-decoration: underline;
     }
@@ -31,6 +31,7 @@
       margin-top: 10px;
     }
     .chat-container{
+      flex-grow: 1;
       display: flex;
       flex-direction: row;
       justify-content: center;
@@ -44,6 +45,8 @@
     .trini-image{
       width: 80px;
       height: 80px;
+      /* box-shadow: 0px 0px 5px 5px  var(--main-color); */
+      animation: glow 1s ease-in-out infinite alternate;
     }
 
     .hacker-image{
@@ -67,14 +70,18 @@
     .chat-content{
       display: flex;
       flex-direction: column;
-      justify-content: first baseline;
-      padding: 20px;
+      justify-content: flex-start;
+      padding: 10px;
+      padding-top: 20px;
+      padding-left: 20px;
       text-align: left;
-      margin-top: 60px;
-      margin-left: -40px;
+      margin-top: 50px;
+      margin-left: -80px;
+      height: 60%;
       
     }
     .chat-message{
+      margin-top: 15px;
       font-size: 1rem;
     }
     .chat-header h3{
@@ -122,42 +129,15 @@
       border-radius: 50%;
     }
 
-    .hint-button-container{
-      
+    .hint-button-container, .sql-button-container, .help-button-container{
       background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
-      width: 100px;
+      width: 30%;
       border-color: var(--main-color);
       border: 1px solid var(--main-color);
       border-radius: 5px;
       padding: 10px;
-      position: absolute;
-      top: -70px;
-      right: 10px;
     }
 
-    .help-button-container{
-      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
-      width: 100px;
-      border-color: var(--main-color);
-      border: 1px solid var(--main-color);
-      border-radius: 5px;
-      padding: 10px;
-      position: absolute;
-      top: -70px;
-      right: 150px;
-    }
-
-    .sql-button-container{
-      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
-      width: 100px;
-      border-color: var(--main-color);
-      border: 1px solid var(--main-color);
-      border-radius: 5px;
-      padding: 10px;
-      position: absolute;
-      top: -70px;
-      right: 290px;
-    }
 
     #sql-commands-explanation{
       padding: 10px;
@@ -190,29 +170,40 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      justify-content: space-around
+      justify-content: center;
+      gap: 3px;
     }
 
     .query-form-area{
       position: relative;
     }
 
+    #button-container-actions{
+      display: flex;
+      gap: 10px;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 10px;
+    }
+
     @keyframes glow {
       from {
-        text-shadow: 0 0 5px var(--main-color),
+        box-shadow: 0 0 5px var(--main-color),
                      0 0 10px white,
                      0 0 15px var(--main-color);
       }
       to {
-        text-shadow: 0 0 60px var(--main-color),
-                     0 0 60px var(--main-color), 
-                     0 0 60px var(--main-color);
+        box-shadow: 0 0 15px var(--main-color),
+                     0 0 20px var(--main-color), 
+                     0 0 30px var(--main-color);
       }
     }
 
     #trini-name{
-      font-size: 0.8rem;
+      font-size: 1.2rem;
       font-weight: bold;
+      margin-left: 50px;
       color: var(--main-color);
 
     }
@@ -227,15 +218,6 @@
 
           <div class="input-box">
             <form  class="query-form-area" id="query-form" name="query-input">
-              <div class="sql-button-container">
-                <span type="hint" id="sql-button" onclick="LoadSqlCommands()"><img class="hint-button-image" src="images/hacker.png" alt="Hint"><span id="number-clues-left"></span> Cheat Sheet</span>
-              </div>
-              <div class="help-button-container">
-                <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"><span id="number-clues-left"></span> Tutorial</span>
-              </div>
-              <div class="hint-button-container">
-                <span type="hint" id="hint-button"><img class="hint-button-image" src="images/white-rabbit.png" alt="Hint"><span id="number-clues-left"></span> Hint</span>
-              </div>
               <div class="input-container">
                 <textarea
                   id="query-textarea"
@@ -325,23 +307,22 @@
             </div>
           </div>
 
-          <div class="">
-            <div class="chat-container">
-              <div class="chat-image">
-                <img class="trini-image super-image" src="images/trini.png" alt="Trini" onclick="getHelp()" style="cursor: pointer;" title="Help">
-                <span id="trini-name">?</span>
+          
+          <div class="chat-container">
+            <div class="chat-image">
+              <img class="trini-image super-image" src="images/trini.png" alt="Trini" onclick="getHelp()" style="cursor: pointer;" title="Help">
+            </div>
+            <div class="chat-content inner-box-side">
+              <div class="chat-header">
+                <h3 id="trini-name">Triny</h3>
+              
               </div>
-              <div class="chat-content inner-box-side">
-                <div class="chat-header">
-                  <h3>Triny</h3>
-                
-                </div>
-                <div class="chat-message">
-                  <p id="triny-text">Trinity Speech Text</p>
-                </div>
+              <div class="chat-message">
+                <p id="triny-text">Trinity Speech Text</p>
               </div>
             </div>
           </div>
+          
 
 
 
@@ -379,7 +360,18 @@
             </tr>
           </table>
 
- 
+          
+          <div id="button-container-actions">
+            <div class="sql-button-container">
+              <span type="hint" id="sql-button" onclick="LoadSqlCommands()"><img class="hint-button-image" src="images/hacker.png" alt="Hint"><span id="number-clues-left"></span> Cheat Sheet</span>
+            </div>
+            <div class="help-button-container">
+              <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"><span id="number-clues-left"></span> Tutorial</span>
+            </div>
+            <div class="hint-button-container">
+              <span type="hint" id="hint-button"><img class="hint-button-image" src="images/white-rabbit.png" alt="Hint"><span id="number-clues-left"></span> Hint</span>
+            </div>
+          </div>
 
         </div>
       </div>
