@@ -4,11 +4,13 @@
   --constraint-color: #0099FF;
   --constraint-color-dark: #006699;
   --button-color: rgb(94, 31, 130);
+  --button-different-color: #ffff;
+  --dark-color: #000000;
 }
 
 body {
   margin: 20px;
-  background-color: black;
+  background-color: var(--dark-color);
   color: var(--main-color);
   font-family: Arial, sans-serif;
   height: 100%;
