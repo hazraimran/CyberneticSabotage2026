@@ -698,6 +698,10 @@ function endGame() {
   window.location.href = "login.html";
 }
 
+function provideFeedback() {
+  window.location.href = "endScreen.html";
+}
+
 /**
  * Updates the game story based on query results
  * @function
@@ -830,6 +834,7 @@ function generateSwalRestart(config = {}) {
   const actions = {
     confirm: () => restartGame(),
     cancel: () => endGame(),
+    deny: () => provideFeedback(),
     ...config.actions,
   }
   
@@ -839,6 +844,8 @@ function generateSwalRestart(config = {}) {
     confirmButtonText: 'Reebot Mission',
     showCancelButton: true,
     cancelButtonText: 'No',
+    showDenyButton: true,
+    denyButtonText: 'Provide Feedback',
     color: '#fff',
     background: '#26242470',
     backdrop: `
@@ -849,10 +856,13 @@ function generateSwalRestart(config = {}) {
   `,
     ...config.swal,
   }).then((result) => {
+
     if (result.isConfirmed) {
       actions.confirm();
     } else if (result.isDismissed && result.dismiss === 'cancel') {
       actions.cancel();
+    } else if (result.isDenied ) {
+      actions.deny();
     } else {
       generateSwalRestart(config);
     }
