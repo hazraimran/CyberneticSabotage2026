@@ -187,6 +187,17 @@
       margin-top: 10px;
     }
 
+    #number-clues-left{
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--button-different-color);
+      background-color: var(--constraint-color);
+      padding: 2px;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+    }
+
     @keyframes glow {
       from {
         box-shadow: 0 0 5px var(--main-color),
@@ -363,13 +374,13 @@
           
           <div id="button-container-actions">
             <div class="sql-button-container">
-              <span type="hint" id="sql-button" onclick="LoadSqlCommands()"><img class="hint-button-image" src="images/hacker.png" alt="Hint"><span id="number-clues-left"></span> Cheat Sheet</span>
+              <span type="hint" id="sql-button" onclick="LoadSqlCommands()"><img class="hint-button-image" src="images/hacker.png" alt="Hint"> Cheat Sheet</span>
             </div>
             <div class="help-button-container">
-              <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"><span id="number-clues-left"></span> Tutorial</span>
+              <span type="hint" id="help-button"><img class="hint-button-image" src="images/trini.png" alt="Hint"> Tutorial</span>
             </div>
             <div class="hint-button-container">
-              <span type="hint" id="hint-button"><img class="hint-button-image" src="images/white-rabbit.png" alt="Hint"><span id="number-clues-left"></span> Hint</span>
+              <span type="hint" id="hint-button"><img class="hint-button-image" src="images/white-rabbit.png" alt="Hint"><span id="number-clues-left"></span><span id="hint-text"> Hint</span></span>
             </div>
           </div>
 

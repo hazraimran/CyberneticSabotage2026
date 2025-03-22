@@ -62,12 +62,13 @@ const DOM = {
   noButton: document.getElementById('no'),
   okayButton: document.getElementById('okay'),
   hintContainer: document.getElementById('modal-content'),
+  numberCluesLeft: document.getElementById('number-clues-left'),
+  hintText: document.getElementById('hint-text'),
   progressBar: document.getElementById('progress-bar'),
   progressText: document.getElementById('progress-text'),
   scoreText: document.getElementById('score'),
   endButton: document.getElementById('end-game'),
   clearButton: document.getElementById('clear-button'),
-  numberCluesLeft: document.getElementById('number-clues-left'),
   agentNameDisplay: document.getElementById('agent-name-display'),
   correctQueries: document.getElementById('correct-queries'),
   settingsButton: document.getElementById('settings-button'),
@@ -326,7 +327,6 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
     const data = await response.json();
   } catch (error) {
 
-    console.log(error);
     Swal.fire({
       title: 'Error',
       text: 'There was a problem submitting your data. Please try again.',
@@ -527,6 +527,7 @@ function updateProgressBar(change) {
   DOM.progressBar.style.width = GameState.progress + '%';
   DOM.progressText.innerText = GameState.progress + '%';
   displayRepairRow();
+  updateHintCounter();
 }
 
 /**
@@ -541,9 +542,9 @@ function getHint() {
 
   if (GameState.hintCounter < hintArray.length) {
     updateScore(-GAME_CONFIG.hintPoints[GameState.hintCounter]);
-    GameState.hintCounter = GameState.hintCounter + 1;
-    return hintArray;
   }
+  updateHintCounter(1);
+  return hintArray;
 }
 
 function getHelp() {
@@ -561,7 +562,7 @@ function getHelp() {
 function yesButtonHandler() {
   const hintIndex = GameState.currentQueryIndex;
   const hintArray = GameData.hints[hintIndex];
-  if (GameState.hintCounter !== hintArray.length) {
+  if (GameState.hintCounter < hintArray.length) {
     Swal.fire({
       title: 'Would you like to hire White Rabbit?',
       ...GAME_CONFIG.whiteRabbitConfig,
@@ -587,7 +588,8 @@ function yesButtonHandler() {
         })
       }
     })
-  } else {
+  } else if (GameState.hintCounter === hintArray.length) {
+    updateHintCounter(1);
     Swal.fire({
       title: 'White Rabit Wants To Help',
       text: 'I have infiltrated the database and found the answer to your question. Im sending it to you now.',
@@ -681,7 +683,6 @@ function restartGame() {
   GameState.correctQueriesSolved = 0;
   appendStoryline(GameData.queries[0]);
   GameState.currentQueryIndex = 0;
-  GameState.hintCounter = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
 
   setGameConfiguration(0, 150);
@@ -722,7 +723,6 @@ function getStory(increaseScore = true, query = '') {
       if (increaseScore) {
         GameState.correctQueriesSolved++;
         updateScore(100);
-        GameState.hintCounter = 0;
         Swal.fire({
           title: '',
           imageUrl: ImagesLoader["trini"],
@@ -787,6 +787,25 @@ function updateScore(change) {
   }
 }
 
+/**
+ * Updates the hint counter
+ * @function
+ * @param {number} change - The amount to increase hint counter by
+ */
+function updateHintCounter(change = 0) {
+  GameState.hintCounter = change === 0 ? 0 : GameState.hintCounter + change;
+  const hintArray = GameData.hints[GameState.currentQueryIndex];
+  const difference = Math.max(hintArray.length - GameState.hintCounter + 1, 0);
+
+  DOM.numberCluesLeft.textContent = difference;
+  DOM.hintText.textContent = difference === 1 ? 'Hint' : 'Hints';
+
+}
+
+/**
+ * Displays the game over message
+ * @function
+ */
 function gameOver() {
   generateSwalRestart({ swal: {
     title: 'Game Over',
@@ -800,6 +819,12 @@ function askForRestart() {
   generateSwalRestart({actions: {cancel: () => null}} );
 }
 
+/**
+ * Generates a Swal restart dialog
+ * @function
+ * @param {Object} config - The configuration object for the Swal dialog
+ * @returns {Promise} A promise that resolves when the dialog is confirmed or dismissed
+ */
 function generateSwalRestart(config = {}) {
 
   const actions = {
@@ -807,7 +832,7 @@ function generateSwalRestart(config = {}) {
     cancel: () => endGame(),
     ...config.actions,
   }
-
+  
   Swal.fire({
     title: 'Would you like to restart?',
     icon: 'warning',
@@ -826,9 +851,12 @@ function generateSwalRestart(config = {}) {
   }).then((result) => {
     if (result.isConfirmed) {
       actions.confirm();
-    } else {
+    } else if (result.isDismissed && result.dismiss === 'cancel') {
       actions.cancel();
+    } else {
+      generateSwalRestart(config);
     }
+    
   });
 }
 
@@ -896,7 +924,6 @@ async function initializeDB() {
 function executeQuery(query, index, queryWrapper) {
   try {
     const results = GameState.db.exec(query);
-    console.log({results});
   
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.');
