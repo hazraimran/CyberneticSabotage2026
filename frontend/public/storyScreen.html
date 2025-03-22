@@ -33,7 +33,7 @@
         opacity: 1;
       }
 
-      button {
+      button, #skip-button {
         color: lime;
         background-color: black;
         border: solid lime 2px;
@@ -137,6 +137,30 @@
         margin-top: 20px;
       }
 
+      .story-text {
+        list-style-type: none;
+        padding: 10px;  
+        margin: 0;
+      }
+
+      .story-text li {
+        padding: 10px;
+        animation: fadeIn 1s ease-in-out;
+      }
+
+      .story-text li:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .story-text li:before {
+        content: "\00BB";
+        color: lime;
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+      }
+
       @keyframes bounce {
           0%, 100% {
               transform: translateY(0);
@@ -145,6 +169,12 @@
               transform: translateY(-2px);
           }
       }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
 
     </style>
   </head>
@@ -157,26 +187,28 @@
         <div id="scene-area">
           
           <h1 id="scene-title"></h1>
-          <div id="arrow-left-disabled" onclick="beginGame()" style="cursor: pointer;">
-            <span>Skip</span>
-          </div>
+
           <p id="scene-text"></p>
+
           <div id="arrow-container">
             <div id="arrow-left" style="display: none;" onclick="previousScene()">
               <img src="images/larrow.png" alt="Arrow" class="arrow-image" >
+            </div>
+            <div id="button-container" style="display: none;">
+              <button id="begin-button" onclick="beginGame()">Begin</button>
             </div>
             <div id="arrow-right" style="display: none;" onclick="nextScene()">
               <img src="images/rarrow.png" alt="Arrow" class="arrow-image" >
             </div>
           </div>
-          <div id="button-container" style="display: none;">
-            <h1>Are you ready?</h1>
-            <button id="begin-button" onclick="beginGame()">Begin</button>
-          </div>
+
         </div>  
         <div id="agent-info" title="Menu Hacker" tooltip="Menu Hacker">
           <img src="images/hacker.png" alt="Hacker" id="hacker-image">
           <span>CodeName:</span><span id="agent-name"></span>
+          <div id="skip-button" onclick="beginGame()" style="cursor: pointer;">
+            <span>Skip</span>
+          </div>
         </div>
       </div>
 

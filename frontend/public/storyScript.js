@@ -14,17 +14,9 @@ if(!agentName){
 }
 
 
-const sceneText = [['The Digital Age',
-  'The year is 2145. Cities shimmer with neon, and vast digital networks course through the veins of civilization. In this matrix-infused world, data is power, and power is everything. To embark on your journey, navigate with the left and right arrow keys.'],
-  [`${agentName}'s Calling`,
-  `You are an enigma prodigious programmer, known in hushed tones as ${agentName}. RoboTech Global, a global behemoth, is ensnared in a web of digital deception. Their databases hint at internal betrayal, external espionage, or perhaps... an AI evolving beyond its confines. They\'ve sent for you, the only one with the skills to decode the chaos.`],
-  ['Navigating the Labyrinth',
-  'Each database is a labyrinth, with secrets locked behind SQL challenges. Crack them, and your score soars. But be cautious: errors will deplete your score, and the deeper you go, the more intricate the queries become. While hints can light your way, they bear a cost. Use them wisely.'],
-  ['Allies in Code',
-  'Yet, in this digital expanse, you\'re not isolated. Triny, an advanced AI ally, stands by your side. Gleaming at the screen\'s corner, she\'s your beacon amidst the data storms, offering clues and guidance. But heed this: leaning on Triny too much might drain your score faster than you anticipate.'],
-  ['The Future of RoboTech Global',
-    'The future of RoboTech Global, and perhaps the digital world at large, hinges on your prowess. Beyond each SQL challenge lies a fragment of the truth. Can you piece together the mystery, or will you be consumed by the endless streams of data? Dive in, Cipher, and let the digital hunt begin!'],
-  ['','']
+const sceneText = [['The Digital Age', ['2145. Data rules civilization, but something is corrupting the system', `You are Cipher, a legendary hacker known as "${agentName}".`, 'RoboTech is a powerful AI and robotics corporation that hires you to uncover the truth behind a mysterious system breach threatening global security', 'Decrypt the system before it\'s too late.']],
+  ['The Labyrinth Awaits', ['The database is a maze of encrypted secrets.', 'Solve SQL challenges, but be warned. Mistakes cost you.', 'Triny, your AI ally, can help you, but at a price.', 'Crack the code. Survive the game.']],
+  ['Are You Ready?', ['The future of RoboTech and the digital world rests in your hands.', 'Decrypt. Unravel. Survive.', 'Begin your journey.']],
 ]
 
 
@@ -42,15 +34,11 @@ function previousScene () {
 
 function displayText() {
 
-  // Add fade effect to scene elements
-  sceneTitleElement.style.opacity = 0;
-  sceneTextElement.style.opacity = 0;
-  
   // Animate text with typewriter effect
   let titleText = sceneText[currentScene][0];
-  let storyText = sceneText[currentScene][1];
-  let titleIndex = 0;
-  let storyIndex = 0;
+  // Create unordered list element
+  let storyText = `<ul class="story-text">${sceneText[currentScene][1].map(line => `<li>${line}</li>`).join('')}</ul>`;
+
 
   // Clear previous content
   sceneTitleElement.textContent = '';
@@ -60,39 +48,12 @@ function displayText() {
   sceneTitleElement.style.opacity = 1;
   sceneTextElement.style.opacity = 1;
 
-  if (writing) {
-    writing = false
-    if(titleInterval) clearInterval(titleInterval)
-    if(storyInterval) clearInterval(storyInterval)
-
-    sceneTitleElement.textContent = titleText
-    sceneTextElement.textContent = storyText;
-    displayArrows()
-    return
-  } 
   
-  writing = true
-  displayArrows(true)
-  // Animate title
-  titleInterval = setInterval(() => {
-    if (titleIndex < titleText.length) {
-      sceneTitleElement.textContent += titleText.charAt(titleIndex);
-      titleIndex++;
-    } else {
-      clearInterval(titleInterval);
-      // Start story text animation after title completes
-      storyInterval = setInterval(() => {
-        if (storyIndex < storyText.length) {
-          sceneTextElement.textContent += storyText.charAt(storyIndex);
-          storyIndex++;
-        } else {
-          clearInterval(storyInterval);
-          writing = false
-          displayArrows(writing)
-        }
-      }, 10);
-    }
-  }, 50);
+  sceneTitleElement.textContent = titleText
+  sceneTextElement.innerHTML = storyText;
+  displayArrows()
+
+
 
   if (currentScene === sceneText.length - 1) {
     document.getElementById('button-container').style.display = 'block'
