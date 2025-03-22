@@ -75,7 +75,7 @@ async function submitRes(usr_res) {
 
 
 function goToMain () {
-  location.assign('register.html')
+  location.assign('index.html')
 }
 
 function restart () {
