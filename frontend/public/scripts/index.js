@@ -80,7 +80,7 @@ async function startGame(type) {
     const userFactory = new UserFactory(username,password, type);
     await userFactory.initializeUserInstance();
     if(userFactory.isUserVerified()){
-      window.location.href = userFactory.getTotalQueriesSolved() > 0 ? "mainGame.html" : "storyScreen.html";
+      window.location.replace(userFactory.getTotalQueriesSolved() > 0 ? "mainGame.html" : "storyScreen.html");
     }else{
       document.getElementById('warning').classList.remove('hidden');
     }

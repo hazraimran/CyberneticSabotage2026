@@ -75,7 +75,7 @@ async function submitRes(usr_res) {
 
 
 function goToMain () {
-  location.assign('index.html')
+  location.replace('login.html')
 }
 
 function restart () {

@@ -7,7 +7,7 @@ const sceneTextElement = document.getElementById('scene-text')
 const agentNameElement = document.getElementById('agent-name')
 
 if(!agentName){
-  window.location.href = "index.html"
+  window.location.replace("login.html")
 } else {
   agentName = agentName.charAt(0).toUpperCase() + agentName.slice(1)
   agentNameElement.textContent = agentName
@@ -83,7 +83,7 @@ window.addEventListener('keydown', event => {
 })
 
 function beginGame () {
-  window.location.href = "mainGame.html";
+  window.location.replace("mainGame.html");
 }
 
 const canvasStory = document.querySelector('canvas')
