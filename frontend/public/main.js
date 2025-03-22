@@ -691,21 +691,7 @@ function restartGame() {
   initializeDB();
 }
 
-function askForRestart() {
-  Swal.fire({
-    title: 'Would you like to restart?',
-    icon: 'warning',
-    confirmButtonText: 'Yes',
-    showCancelButton: true,
-    cancelButtonText: 'No',
-    background: '#000',
-    color: '#fff',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      restartGame();
-    }
-  });
-}
+
 function endGame() {
   localStorage.clear();
   window.location.href = "login.html";
@@ -721,22 +707,13 @@ function getStory(increaseScore = true, query = '') {
   const nextQueryIndex = GameState.currentQueryIndex + 1;
   if (GameState.flag === true && nextQueryIndex <= GameData.queries.length) {
     if (nextQueryIndex === GameData.queries.length) {
-      Swal.fire({
-        title: 'Congratulations!',
-        text: 'You have saved RoboTech. Would you like to try again?',
-        icon: 'success',
-        confirmButtonText: 'Yes',
-        showCancelButton: true,
-        cancelButtonText: 'No',
-        background: '#000',
-        color: '#fff',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          restartGame();
-        } else {
-          endGame();
+      generateSwalRestart({
+        swal: {
+          title: 'Congratulations!',
+          text: 'You have saved RoboTech and the world. Would you like to try again?',
+          icon: 'success',
         }
-      });
+      })
     } else {
       const nextQuery = GameData.queries[nextQueryIndex];
       appendStoryline(nextQuery);
@@ -772,28 +749,6 @@ function getStory(increaseScore = true, query = '') {
       appendStoryline('Oops! Please try again.' + currentQuery);
       updateScore(-10);
     }
-
-    if (GameState.score <= 0) {
-      Swal.fire({
-        title: 'Game Over',
-        text: 'RoboTech has fallen. Would you like to try again?',
-        icon: 'error',
-        background: '#000',
-        color: '#fff',
-        confirmButtonText: 'OK',
-        showCancelButton: true,
-        cancelButtonText: 'No',
-        confirmButtonColor: 'var(--secondary-color)',
-        cancelButtonColor: 'black',
-        cancelButtonTextColor: 'var(--main-color)',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          restartGame();
-        } else {
-          endGame();
-        }
-      });
-    }
   }
 }
 
@@ -825,8 +780,57 @@ function updateScore(change) {
     incorrectSound.currentTime = 0;
     incorrectSound.play();
   }
+
+  
+  if (GameState.score <= 0) {
+    gameOver();
+  }
 }
 
+function gameOver() {
+  generateSwalRestart({ swal: {
+    title: 'Game Over',
+    html: '<h1>RoboTech has fallen. The system has been compromised.</h1><br><p>The enemy now controls the robots. You were our last hope.</p><p>Do you want to launch a counterattack and try again?</p>',
+    icon: 'error',
+    cancelButtonText: 'Accept Defeat',
+  }})
+}
+
+function askForRestart() {
+  generateSwalRestart({actions: {cancel: () => null}} );
+}
+
+function generateSwalRestart(config = {}) {
+
+  const actions = {
+    confirm: () => restartGame(),
+    cancel: () => endGame(),
+    ...config.actions,
+  }
+
+  Swal.fire({
+    title: 'Would you like to restart?',
+    icon: 'warning',
+    confirmButtonText: 'Reebot Mission',
+    showCancelButton: true,
+    cancelButtonText: 'No',
+    color: '#fff',
+    background: '#26242470',
+    backdrop: `
+      rgba(0,0,123,0.4)
+      url("images/hacker.png")
+      no-repeat
+      center center
+  `,
+    ...config.swal,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      actions.confirm();
+    } else {
+      actions.cancel();
+    }
+  });
+}
 
 
 /**
