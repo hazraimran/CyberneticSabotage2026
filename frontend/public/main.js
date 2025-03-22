@@ -699,7 +699,7 @@ function endGame() {
 }
 
 function provideFeedback() {
-  window.location.href = "endScreen.html";
+  window.location.href = "endScreen.html?gameStatus=" + GameState.score;
 }
 
 /**
