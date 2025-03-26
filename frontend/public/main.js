@@ -345,25 +345,15 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
  */
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const queryWrapper = document.createElement('div');
-  const queryParagraph = document.createElement('p');
   const x = document.forms['query-input']['query-input-box'].value;
   const query = DOM.textarea.value;
-
-  // Always append queryWrapper to displayText first since it's needed in all cases
-  DOM.displayText.appendChild(queryWrapper);
-
+  
   if (!validateForm()) {
-    displayError(queryWrapper, 'Empty Query Provided');
+    displayMessage('Empty Query Provided', true);
   } else if (!isValidSQLQuery(query)) {
-    displayError(queryWrapper, 'Invalid SQL Query Syntax: ' + query);
+    displayMessage('Invalid SQL Query Syntax: ' + query, true);
   } else {
-    GameState.queryHistory.push(query);
-    queryParagraph.textContent = query;
-    queryWrapper.appendChild(queryParagraph);
-    // Execute query and update UI
-    await executeQuery(query, GameState.currentQueryIndex, queryWrapper);
-    await getStory(true, query);
+    analyzeQuery(query);
   }
 
   // Scroll to bottom once at the end
@@ -372,6 +362,29 @@ async function handleFormSubmit(event) {
   // add push to database over here
   await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score);
 }
+
+/**
+ * Analyzes the query and updates the UI
+ * @async
+ * @function
+ * @param {string} query - The query to analyze
+ * @param {number} index - The index of the query
+ * @param {boolean} manually - Whether the query is being analyzed manually
+ */
+async function analyzeQuery(query, index = GameState.currentQueryIndex, manually = true) {
+  
+  //Update the UI
+  displayMessage(query);
+  // Execute query and update UI
+  executeQuery(query, index);
+
+  //If the system runs this function manually, then we need to add the query to the history and get the story
+  if (manually) {
+    GameState.queryHistory.push(query);
+    getStory(true, query);
+  }
+}
+
 
 /**
  * Validates that the form input is not empty
@@ -402,26 +415,13 @@ function scrollToBottom() {
 }
 
 /**
- * Displays an error message
- * @function
- * @param {HTMLElement} queryWrapper - The element to append the error to
- * @param {string} message - The error message to display
- */
-function displayError(queryWrapper, message) {
-  const errorElement = document.createElement('p');
-  errorElement.textContent = message;
-  errorElement.style.color = 'red';
-  queryWrapper.appendChild(errorElement);
-  scrollToBottom();
-}
-
-/**
  * Displays query results in a table format
  * @function
- * @param {HTMLElement} queryWrapper - The element to append the table to
  * @param {Object} result - The query result object
  */
-function displayResults(queryWrapper, result) {
+function displayResults(result) {
+  const queryWrapper = document.createElement('div');
+  DOM.displayText.appendChild(queryWrapper);
   const table = document.createElement('table');
   table.style.borderCollapse = 'collapse';
   table.style.width = '100%';
@@ -456,29 +456,58 @@ function displayResults(queryWrapper, result) {
   queryWrapper.appendChild(table);
 }
 
-function displayMessage(queryWrapper, message) {
+/**
+ * Displays a message in the display text
+ * @function
+ * @param {string} message - The message to display
+ * @param {boolean} isError - Whether the message is an error
+ */
+function displayMessage(message, isError = false) {
+
+  const queryWrapper = document.createElement('div');
   const p = document.createElement('p');
   p.textContent = message;
+
+  // If the message is an error, set the color to red
+  if (isError) p.style.color = 'red';
+  
   queryWrapper.appendChild(p);
+  DOM.displayText.appendChild(queryWrapper);
+  scrollToBottom();
 }
 
+/**
+ * Displays the repair row
+ * @function
+ */
 function displayRepairRow() {
   document.getElementById('repair-row').style.display =  GameState.currentQueryIndex > 9 ? 'table-row' : 'none';
 }
 
+/**
+ * Updates the timer display
+ * @function
+ */
 function updateTimer() {
   const now = Date.now();
   const timeElapsed = Math.round((now - GameState.startTime) / 1000);
   document.getElementById('timer').textContent = 'Time: ' + timeElapsed + 's';
 }
 
-
+/**
+ * Toggles the sound modal
+ * @function
+ */
 function toggleSound() {
   const modal = document.getElementById('sound-modal');
   modal.style.display == 'block' ? modal.style.display = 'none' : modal.style.display = 'block';
 }
 
-
+/**
+ * Loads the SQL commands
+ * @function
+ * @param {boolean} allKeys - Whether to load all keys
+ */
 function LoadSqlCommands(allKeys = false) {
   
   const currentGroup = allKeys ? null : GameData.queryAnswers[GameState.currentQueryIndex];
@@ -493,6 +522,12 @@ function LoadSqlCommands(allKeys = false) {
   toggleSql();
 }
 
+/**
+ * Extracts the SQL keywords from the query
+ * @function
+ * @param {string} query - The query to extract the keywords from
+ * @returns {Array<string>} The extracted keywords
+ */
 function extractSqlKeywords(query = null) {
 
   const sqlCommands = Object.keys(SQL_COMMANDS_HTML);
@@ -500,17 +535,29 @@ function extractSqlKeywords(query = null) {
   return extractedKeywords;
 }
 
+/**
+ * Toggles the SQL modal
+ * @function
+ */
 function toggleSql() {
   const modal = document.getElementById('sql-modal');
   modal.style.display == 'block' ? modal.style.display = 'none' : modal.style.display = 'block';
 }
 
+/**
+ * Sets the sound off
+ * @function
+ */
 function setSoundOff() {
   GameState.soundEnabled = false;
   const modal = document.getElementById('sound-modal');
   modal.style.display = 'none';
 }
 
+/**
+ * Sets the sound on
+ * @function
+ */
 function setSoundOn() {
   GameState.soundEnabled = true;
   const modal = document.getElementById('sound-modal');
@@ -547,6 +594,10 @@ function getHint() {
   return hintArray;
 }
 
+/**
+ * Gets help from the White Rabbit
+ * @function
+ */
 function getHelp() {
   Swal.fire({
     imageUrl: ImagesLoader["tutorial"],
@@ -559,6 +610,10 @@ function getHelp() {
   });
 }
 
+/**
+ * Handles the yes button click
+ * @function
+ */
 function yesButtonHandler() {
   const hintIndex = GameState.currentQueryIndex;
   const hintArray = GameData.hints[hintIndex];
@@ -605,16 +660,28 @@ function yesButtonHandler() {
   }
 }
 
+/**
+ * Handles the no button click
+ * @function
+ */
 function noButtonHandler() {
   const modal = document.getElementById('hint-modal');
   modal.style.display = 'none';
 }
 
+/**
+ * Handles the okay button click
+ * @function
+ */
 function okayButtonHandler() {
   const modal = document.getElementById('hint-modal');
   modal.style.display = 'none';
 }
 
+/**
+ * Handles the click event on the hint modal
+ * @function
+ */
 window.onclick = function (event) {
   const modal = document.getElementById('hint-modal');
   if (event.target === modal) {
@@ -622,16 +689,29 @@ window.onclick = function (event) {
   }
 }
 
+/**
+ * Handles the SQL button click
+ * @function
+ */
 function sqlButtonHandler() {
   const modal = document.getElementById('sql-modal');
   modal.style.display = 'block';
 }
 
+/**
+ * Clears the query
+ * @function
+ */
 function clearQuery() {
   DOM.textarea.value = '';
   DOM.clearButton.style.display = 'none';
 }
 
+/**
+ * Gets the agent name
+ * @function
+ * @returns {string} The agent name
+ */
 function getAgentName() {
   const agentName = localStorage.getItem('user');
   if (agentName) {
@@ -640,6 +720,10 @@ function getAgentName() {
   return 'Phoenix';
 }
 
+/**
+ * Starts the game
+ * @function
+ */
 function startGame() {
 
   GameState.startTime = Date.now();
@@ -674,6 +758,10 @@ function startGame() {
   updateProgressBar(GameState.correctQueriesSolved * 8);
 }
 
+/**
+ * Restarts the game
+ * @function
+ */
 function restartGame() {
   GameState.queryHistory = [];
   DOM.displayText.innerHTML = '';
@@ -692,12 +780,19 @@ function restartGame() {
   initializeDB();
 }
 
-
+/**
+ * Ends the game
+ * @function
+ */
 function endGame() {
   localStorage.clear();
   window.location.href = "login.html";
 }
 
+/**
+ * Provides feedback
+ * @function
+ */
 function provideFeedback() {
   window.location.href = "endScreen.html?gameStatus=" + GameState.score;
 }
@@ -738,9 +833,9 @@ function getStory(increaseScore = true, query = '') {
           background: '#000',
           color: '#fff',
           toast: true,  
-          position: 'bottom-right',
+          position: 'bottom-center',
           showConfirmButton: false,
-          timer: 3000,
+          timer: 2000,
         }).then(() => {
           setGameConfiguration(GameState.correctQueriesSolved, GameState.score);
         });
@@ -757,6 +852,11 @@ function getStory(increaseScore = true, query = '') {
   }
 }
 
+/**
+ * Calculates the time elapsed
+ * @function
+ * @returns {number} The time elapsed
+ */
 function timeElapsed() {
   const now = Date.now();
   const timeElapsed = Math.round((now - GameState.startTime) / 1000);
@@ -764,12 +864,11 @@ function timeElapsed() {
   return timeElapsed;
 }
 
-function updateTimer() {
-  const now = Date.now();
-  const timeElapsed = Math.round((now - GameState.startTime) / 1000);
-  document.getElementById('timer').textContent = 'Time: ' + timeElapsed + 's';
-}
-
+/**
+ * Updates the score
+ * @function
+ * @param {number} change - The amount to change the score by
+ */
 function updateScore(change) {
   GameState.score += change;
   DOM.scoreText.textContent = 'Score: ' + GameState.score;
@@ -820,6 +919,10 @@ function gameOver() {
   }})
 }
 
+/**
+ * Asks for a restart
+ * @function
+ */ 
 function askForRestart() {
   generateSwalRestart({actions: {cancel: () => null}} );
 }
@@ -910,7 +1013,7 @@ function validateResult(resultValues, queryIndex) {
  * @async
  * @function
  */
-async function initializeDB() {
+async function initializeDB(recursion = 0) {
 
   try {
     const SQL = await initSqlJs();
@@ -920,10 +1023,14 @@ async function initializeDB() {
     //Assign the database to the GameState object
     GameState.db = db;
     // Execute all previous queries to set up database state
-    GameData.queryAnswers.slice(0, GameState.currentQueryIndex).forEach(query => db.exec(query));
+    GameData.queryAnswers.slice(0, GameState.currentQueryIndex).forEach((query, idx) => analyzeQuery(query, idx, false));
 
   } catch (error) {
-    console.error('Error initializing database:', error);
+    if (recursion < 3) {
+      initializeDB(recursion ++);
+    } else {
+      console.error('Error initializing database:', error);
+    }
   }
 }
 
@@ -932,29 +1039,21 @@ async function initializeDB() {
  * Executes an SQL query and displays the results
  * @function
  * @param {string} query - The SQL query to execute
- * @param {number} index - The current query index
- * @param {HTMLElement} queryWrapper - The element to display results in
  */
-function executeQuery(query, index, queryWrapper) {
+function executeQuery(query ) {
   try {
     const results = GameState.db.exec(query);
 
     if (results.length === 0) {
-      displayMessage(queryWrapper, 'Command executed successfully.');
+      displayMessage('Command executed successfully.');
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
       } else {
-
-        Swal.fire({
-          title: 'Failed',
-          text: ' ERROR: ' + results,
-          icon: 'success',
-        })
         GameState.flag = validateResult('', GameState.currentQueryIndex)
       }
     } else {
-      displayResults(queryWrapper, results[0]);
+      displayResults(results[0]);
       GameState.flag = validateResult(results[0].values, GameState.currentQueryIndex);
     }
 
@@ -962,7 +1061,7 @@ function executeQuery(query, index, queryWrapper) {
       DOM.textarea.value = '';
     }
   } catch (error) {
-    displayError(queryWrapper, 'ERROR: ' + error.message);
+    displayMessage('ERROR: ' + error.message, true);
     GameState.flag = false;
   }
   scrollToBottom();
