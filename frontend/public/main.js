@@ -113,7 +113,7 @@ const GameData = {
   " Let's uncover the problematic robot models! Find all models that have been involved in more than 2 incidents. Return only the model names.",
   " We need a repair log! Create a <strong>Repair</strong> table to track all robot repairs. Include columns for <strong>repairID</strong> (INTEGER), <strong>repairStatus</strong> (TEXT), <strong>desc</strong> (TEXT), <strong>robotID</strong> (INTEGER), and <strong>repairedById</strong> (INTEGER) to record the employee responsible for the repair.",
   " Time to record a repair case! Insert a new repair record into the <strong>Repair</strong> table with the provided details. Use the given values for <strong>repairID</strong>, <strong>repairStatus</strong>, <strong>desc</strong>, <strong>robotID</strong>, and <strong>repairedById</strong>.",
-  " Who last worked on the faulty robots? Identify the most recent employee who updated the software of robots currently marked as <strong>'In Repair'</strong>. Return their <strong>employeeID, first name, last name, timestamp</strong> of the last update, and the <strong>robotID</strong> they updated."
+  " Who last worked on the faulty robots? Identify the most recent employee who updated the software of robots currently marked as <strong>'Under Repair'</strong>. Return their <strong>employeeID, first name, last name, timestamp</strong> of the last update, and the <strong>robotID</strong> they updated."
   ],
   queryAnswers: [
   'SELECT * FROM Incident;',
@@ -127,7 +127,7 @@ const GameData = {
   'SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );',
   'CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );',
   'INSERT INTO Repair ("repairID", "repairStatus", "desc", "robotID", "repairedById" ) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7); SELECT * FROM Repair;', 
-  'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'In Repair\';'
+  'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\';'
   ],
   hints: [
   ['start with the basics. Use the <strong>SELECT</strong> statement to pull data from the <strong>Incident</strong> table.', 'hink like a pro. Structure your query as: SELECT _ FROM [TableName]. You’re almost there!'],
@@ -710,6 +710,7 @@ function provideFeedback() {
  */
 function getStory(increaseScore = true, query = '') {
   const nextQueryIndex = GameState.currentQueryIndex + 1;
+
   if (GameState.flag === true && nextQueryIndex <= GameData.queries.length) {
     if (nextQueryIndex === GameData.queries.length) {
       generateSwalRestart({
@@ -910,19 +911,22 @@ function validateResult(resultValues, queryIndex) {
  * @function
  */
 async function initializeDB() {
-  await initSqlJs().then(function (SQL) {
-    fetch('database/main.db')
-      .then(response => response.arrayBuffer())
-      .then(buffer => {
-        GameState.db = new SQL.Database(new Uint8Array(buffer));
-      })
-      .then(() => {
-        if (GameState.currentQueryIndex > 9) {
-          GameState.db.exec('CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );');
-        }
-      });
-  });
+
+  try {
+    const SQL = await initSqlJs();
+    const buffer = await fetch('database/main.db');
+    const db = new SQL.Database(new Uint8Array(await buffer.arrayBuffer()));
+
+    //Assign the database to the GameState object
+    GameState.db = db;
+    // Execute all previous queries to set up database state
+    GameData.queryAnswers.slice(0, GameState.currentQueryIndex).forEach(query => db.exec(query));
+
+  } catch (error) {
+    console.error('Error initializing database:', error);
+  }
 }
+
 
 /**
  * Executes an SQL query and displays the results
@@ -934,13 +938,19 @@ async function initializeDB() {
 function executeQuery(query, index, queryWrapper) {
   try {
     const results = GameState.db.exec(query);
-  
+
     if (results.length === 0) {
       displayMessage(queryWrapper, 'Command executed successfully.');
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
       } else {
+
+        Swal.fire({
+          title: 'Failed',
+          text: ' ERROR: ' + results,
+          icon: 'success',
+        })
         GameState.flag = validateResult('', GameState.currentQueryIndex)
       }
     } else {
