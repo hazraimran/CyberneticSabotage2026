@@ -135,7 +135,8 @@ class UserFactory {
       } else if(this.type === "login") {
         newData = await this.checkUser(); 
       }
-      this.data = {...this.data, ...newData?.user, isVerified: newData?.isVerified};
+
+      this.data = {...this.data, ...newData?.user, isVerified: newData?.isVerified, personalizedSettings: newData?.user?.personalizedSettings};
       this.setGameConfiguration();
     }catch(error){
       throw error;
@@ -226,6 +227,12 @@ class UserFactory {
     localStorage.setItem("isVerified", this.data.isVerified);
     localStorage.setItem("totalQueriesSolved", this.data.totalQueriesSolved);
     localStorage.setItem("score", this.data.score);
+
+    if(this.data?.personalizedSettings){   
+      localStorage.setItem("main-color", this.data.personalizedSettings?.['main-color']);
+      localStorage.setItem("constraint-color", this.data.personalizedSettings?.['constraint-color']);
+      localStorage.setItem("text-color", this.data.personalizedSettings?.['text-color']);
+    }
   }
 
   /**

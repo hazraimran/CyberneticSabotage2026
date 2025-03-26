@@ -26,12 +26,12 @@ const GAME_CONFIG = {
     imageUrl: ImagesLoader["white-rabbit"],
     imageWidth: 200,
     imageHeight: 200,
-    background: "linear-gradient(to right, #000, green)",
+    background: "linear-gradient(to right, #000, var(--main-color))",
     color: "white",
     confirmButtonText: "Yes",
     showCancelButton: true,
     cancelButtonText: "No",
-    confirmButtonColor: "var(--secondary-color)",
+    confirmButtonColor: "var(--constraint-color-dark)",
     cancelButtonColor: "black",
     cancelButtonTextColor: "var(--main-color)",
     customClass: {
@@ -75,7 +75,10 @@ const DOM = {
   soundButton: document.getElementById('sound-on-button'),
   soundOffButton: document.getElementById('sound-off-button'),
   sqlCommands: document.getElementById('sql-commands'),
-  sqlExplanation: document.getElementById('sql-commands-explanation')
+  sqlExplanation: document.getElementById('sql-commands-explanation'),
+  mainColorPicker: document.getElementById('mainColorPicker'),
+  constraintColorPicker: document.getElementById('constraintColorPicker'),
+  textColorPicker: document.getElementById('TextColorPicker'),
 };
 
 /**
@@ -260,6 +263,9 @@ function initializeEventListeners() {
   DOM.settingsButton.addEventListener('click',toggleSound);
   DOM.soundOffButton.addEventListener('click', setSoundOff);
   DOM.soundButton.addEventListener('click', setSoundOn);
+  DOM.mainColorPicker.addEventListener('change', setColor);
+  DOM.constraintColorPicker.addEventListener('change', setColor);
+  DOM.textColorPicker.addEventListener('change', setColor);
   DOM.textarea.addEventListener('keydown', (event) => {
     if (DOM.textarea.value === 'wr-code') {
       DOM.textarea.value = GameData.queryAnswers[GameState.currentQueryIndex];
@@ -312,7 +318,9 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
     return;
   }
 
-  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score };
+  const personalizedSettings = getPersonalizedSettings();
+
+  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score,  personalizedSettings};
   try {
     const response = await fetch(`${EXTERNAL_API}/users/submitUserData`, {
       method: 'POST',
@@ -725,7 +733,6 @@ function getAgentName() {
  * @function
  */
 function startGame() {
-
   GameState.startTime = Date.now();
   let score = localStorage.getItem('score');
   let agentName = getAgentName();
@@ -833,7 +840,7 @@ function getStory(increaseScore = true, query = '') {
           background: '#000',
           color: '#fff',
           toast: true,  
-          position: 'bottom-center',
+          position: 'center',
           showConfirmButton: false,
           timer: 2000,
         }).then(() => {
@@ -1084,6 +1091,24 @@ function appendStoryline(text) {
   // Escape special characters to render correctly in HTML
   text = text.replace(/'/g, '&#39;');
   DOM.storyline.innerHTML = text;
+}
+
+function setColor(event) {
+  const color = event.target.value;
+  const id = event.target.id;
+
+  if (id === 'mainColorPicker') {
+    document.documentElement.style.setProperty('--main-color', color);
+    localStorage.setItem('main-color', color);
+  } else if (id === 'constraintColorPicker') {
+    document.documentElement.style.setProperty('--constraint-color', color);
+    localStorage.setItem('constraint-color', color);
+  } else if (id === 'TextColorPicker') {
+    console.log(color);
+    document.documentElement.style.setProperty('--text-color', color);
+    localStorage.setItem('text-color', color);
+  }
+  
 }
 
 /**

@@ -15,6 +15,7 @@ const userSchema = mongoose.Schema(
         score: { type: Number, default: 150 },
         totalQueriesSolved: { type: Number, default: 0 },
         questions: [questionSchema],
+        personalizedSettings: { type: Object, default: {} },
     },
     { timestamps: true }
 );

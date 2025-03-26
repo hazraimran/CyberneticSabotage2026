@@ -4,221 +4,8 @@
     <title>Cybernetic Sabotage</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-
-  <style>
-    #end-game{
-      background-color: var(--button-color);
-      color: var(--button-different-color);
-      border-color: var(--button-color);
-      transition: color .3s linear,background-color .3s linear,border-color .3s linear;
-    }
-    #end-game:hover{
-      background-color: var(--button-different-color);
-      color: var(--button-color);
-      
-    }
-
-    .red-text, strong{
-      color: var(--constraint-color) !important;
-      font-weight: bold;
-      text-decoration: underline;
-    }
-    .inner-box-side{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      height: 30%;
-      margin-top: 10px;
-    }
-    .chat-container{
-      flex-grow: 1;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-    }
-
-    .super-image {
-      border-radius: 50%;
-      border: 2px solid var(--main-color);
-      box-shadow: 0px 0px 5px 5px rgba(229, 223, 223, 0.5);
-    }
-    .trini-image{
-      width: 80px;
-      height: 80px;
-      /* box-shadow: 0px 0px 5px 5px  var(--main-color); */
-      animation: glow 1s ease-in-out infinite alternate;
-    }
-
-    .hacker-image{
-      width: 30px;
-      height: 30px;
-      margin: 0 10px;
-      cursor: pointer;
-    }
-
-    .super-image:hover{
-      transition: all 0.3s ease;
-      box-shadow: 0px 0px 10px 10px  var(--main-color);
-    }
-    .chat-image{
-      display: flex;
-      opacity: 0.8;
-      flex-direction: column;
-      justify-content: flex-start;
-      margin: 20px;
-    }
-    .chat-content{
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      padding: 10px;
-      padding-top: 20px;
-      padding-left: 20px;
-      text-align: left;
-      margin-top: 50px;
-      margin-left: -80px;
-      height: 60%;
-      
-    }
-    .chat-message{
-      margin-top: 15px;
-      font-size: 1rem;
-    }
-    .chat-header h3{
-      margin: 0px;
-      font-size: 1rem;
-    }
-    table{
-      font-size: 1rem;
-    }
-    .table-data-padding{
-      padding: 5px 10px;
-    }
-
-    .side-panel-header{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center ;
-    }
-
-    .agent-name-container{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items:  center ;
-    }
-
-    .chat-message-animation {
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    .button-container{
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    #clear-button{
-      display: none;
-    }
-
-    .hint-button-image{
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-
-    .hint-button-container, .sql-button-container, .help-button-container{
-      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
-      width: 30%;
-      border-color: var(--main-color);
-      border: 1px solid var(--main-color);
-      border-radius: 5px;
-      padding: 10px;
-    }
-
-
-    #sql-commands-explanation{
-      padding: 10px;
-      border-top: 1px solid var(--main-color);
-    }
-
-    #sql-commands {
-      list-style-type: none;
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    #sql-commands li{
-      padding: 10px;
-      text-decoration: none;
-      background-color: var(--dark-color);
-      border-radius: 5px;
-      margin: 10px;
-      cursor: pointer;
-      border: 1px solid var(--main-color);
-    }
-
-    .modal-content{
-      background: linear-gradient(to bottom,  var(--main-color) 0%, #000000 50%);
-    }
-
-    #hint-button, #help-button, #sql-button{
-      background-color: transparent;
-      cursor: pointer;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-    }
-
-    .query-form-area{
-      position: relative;
-    }
-
-    #button-container-actions{
-      display: flex;
-      gap: 10px;
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    #number-clues-left{
-      font-size: 1rem;
-      font-weight: bold;
-      color: var(--button-different-color);
-      background-color: var(--constraint-color);
-      padding: 2px;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-    }
-
-    @keyframes glow {
-      from {
-        box-shadow: 0 0 5px var(--main-color),
-                     0 0 10px white,
-                     0 0 15px var(--main-color);
-      }
-      to {
-        box-shadow: 0 0 15px var(--main-color),
-                     0 0 20px var(--main-color), 
-                     0 0 30px var(--main-color);
-      }
-    }
-
-    #trini-name{
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-left: 50px;
-      color: var(--main-color);
-
-    }
-  </style>
+  <link rel="stylesheet" href="./css/maingame.css">
+  <script src="scripts/personalize.js"></script>
   <body>
     <div class="container">
       <div class="main-panel">
@@ -295,12 +82,38 @@
 
 
           <div id="sound-modal" class="modal">
-            <div class="modal-content">
-              <span class="close" onclick="toggleSound()">&times;</span>
-              <p>Sound Options</p>
-              <button id="sound-on-button">Sound On</button>
-              <button id="sound-off-button">Sound Off</button>
-            </div>
+              <div class="modal-content">
+                <div>
+                  <span class="close" onclick="toggleSound()">&times;</span>
+                  <h3>Sound Options</h3>
+                  <button id="sound-on-button">Sound On</button>
+                  <button id="sound-off-button">Sound Off</button>
+                </div>
+
+                <hr/>
+
+                <div>
+                  <h3>Select Game Colors</h3>
+                  <div id="picker-group-container" class="picker-group-container">
+                    <div class="picker-group">
+                      <label for="mainColorPicker">Main Color</label>
+                      <input type="color" id="mainColorPicker" value="#007bff" />
+                    </div>
+                
+                    <div class="picker-group">
+                      <label for="constraintColorPicker">Constraint Dark Color</label>
+                      <input type="color" id="constraintColorPicker" value="#004080" />
+                    </div>
+
+                    <div class="picker-group">
+                      <label for="TextColorPicker">Text Color</label>
+                      <input type="color" id="TextColorPicker" value="#004080" />
+                    </div>
+                  </div>
+                </div>
+              <div>
+          </div>
+          </div>
           </div>
 
           <div class="info-container">
@@ -334,9 +147,6 @@
             </div>
           </div>
           
-
-
-
           <table>
             <tr>
               <th colspan="2">Database Schema</th>
