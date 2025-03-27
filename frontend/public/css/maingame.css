@@ -259,6 +259,12 @@ table{
   align-items: center;
 }
 
+.sound-button-on{
+  background-color: var(--main-color) !important;
+  color: var(--button-different-color) !important;
+  font-weight: bold !important;
+}
+
 @media (max-width: 768px) {
 
 

@@ -297,9 +297,13 @@ function initializeEventListeners() {
  * @function
  */
 async function initializeGame() {
-  await initializeDB();
-  initializeEventListeners();
-  startGame();
+  try {
+    await initializeDB();
+    initializeEventListeners();
+    startGame();
+  } catch (error) {
+    console.error('Error initializing game:', error);
+  }
 }
 
 /**
@@ -370,7 +374,11 @@ async function handleFormSubmit(event) {
   scrollToBottom();
 
   // add push to database over here
-  await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score);
+  try {
+    await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score);
+  } catch (error) {
+    console.error('Error submitting user data:', error);
+  }
 }
 
 /**
@@ -563,6 +571,8 @@ function setSoundOff() {
   const modal = document.getElementById('sound-modal');
   localStorage.setItem('sound-enabled', 'false');
   modal.style.display = 'none';
+  document.getElementById('sound-on-button').classList.remove('sound-button-on');
+  document.getElementById('sound-off-button').classList.add('sound-button-on');
 }
 
 /**
@@ -574,6 +584,8 @@ function setSoundOn() {
   const modal = document.getElementById('sound-modal');
   localStorage.setItem('sound-enabled', 'true');
   modal.style.display = 'none';
+  document.getElementById('sound-on-button').classList.add('sound-button-on');
+  document.getElementById('sound-off-button').classList.remove('sound-button-on');
 }
 
 /**
@@ -767,6 +779,7 @@ function startGame() {
   updateScore(0);
   initializeDB();
   updateProgressBar(GameState.correctQueriesSolved * 8);
+  updateUivalues();
 }
 
 /**
@@ -1108,7 +1121,6 @@ function setColor(event) {
     document.documentElement.style.setProperty('--constraint-color', color);
     localStorage.setItem('constraint-color', color);
   } else if (id === 'TextColorPicker') {
-    console.log(color);
     document.documentElement.style.setProperty('--text-color', color);
     localStorage.setItem('text-color', color);
   }
@@ -1126,6 +1138,30 @@ function setFontSize(event) {
   document.documentElement.style.fontSize = fontSize + 'px';
 }
 
+
+/**
+ * Updates the UI values
+ * @function
+ */
+function updateUivalues(){
+  const fontSize = localStorage.getItem('font-size');
+  const mainColor = localStorage.getItem('main-color');
+  const constraintColor = localStorage.getItem('constraint-color');
+  const textColor = localStorage.getItem('text-color');
+  const soundEnabled = localStorage.getItem('sound-enabled');
+
+  if(fontSize) document.getElementById('fontSizeSlider').value = fontSize;
+  if(mainColor) document.getElementById('mainColorPicker').value = mainColor;
+  if(constraintColor) document.getElementById('constraintColorPicker').value = constraintColor;
+  if(textColor) document.getElementById('TextColorPicker').value = textColor;
+  if(soundEnabled == 'true') {
+    document.getElementById('sound-on-button').classList.add('sound-button-on');
+  } else {
+    document.getElementById('sound-off-button').classList.add('sound-button-on');
+  }
+  
+  
+}
 /**
  * Starts the game initialization process
  */
