@@ -28,6 +28,8 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  position: relative;
+  margin: 0rem 1rem;
 }
 
 .super-image {
@@ -36,8 +38,11 @@
   box-shadow: 0px 0px 5px 5px rgba(229, 223, 223, 0.5);
 }
 .trini-image{
-  width: 80px;
-  height: 80px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6rem;
+  height: 6rem;
   /* box-shadow: 0px 0px 5px 5px  var(--main-color); */
   animation: glow 1s ease-in-out infinite alternate;
 }
@@ -58,9 +63,12 @@
   opacity: 0.8;
   flex-direction: column;
   justify-content: flex-start;
-  margin: 20px;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 .chat-content{
+  position: absolute;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -68,19 +76,16 @@
   padding-top: 20px;
   padding-left: 20px;
   text-align: left;
-  margin-top: 50px;
-  margin-left: -80px;
+  margin-top: 3rem;
   height: 60%;
+  overflow: auto;
   
 }
 .chat-message{
   margin-top: 15px;
   font-size: 1rem;
 }
-.chat-header h3{
-  margin: 0px;
-  font-size: 1rem;
-}
+
 table{
   font-size: 1rem;
 }
@@ -178,9 +183,13 @@ table{
   justify-content: space-around;
   align-items: center;
   margin-top: 10px;
+  overflow: auto;
 }
 
 #number-clues-left{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 1rem;
   font-weight: bold;
   color: var(--button-different-color);
@@ -205,11 +214,14 @@ table{
 }
 
 #trini-name{
+  position: absolute;
+  top: 0.1rem;
+  left: 4rem;
   font-size: 1.2rem;
   font-weight: bold;
   margin-left: 50px;
   color: var(--text-color);
-
+  
 }
 
 #picker-group-container{
@@ -230,3 +242,41 @@ table{
   cursor: pointer;
 }
 
+#agent-name-display{
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+
+
+@media (max-width: 768px) {
+
+  .info-container{
+    display: none;
+  }
+
+  /* html{
+    font-size: 6px;
+  }
+  #agent-name-display{
+    color: "red" !important;
+    font-size: 1rem;
+  }
+
+
+  #trini-name{
+    color: "red" !important;
+    font-size: 10rem;
+  }
+
+  .chat-container{
+    display: none;
+  }
+
+  .side-panel{
+    max-width: 40vw;
+  } */
+
+
+}
