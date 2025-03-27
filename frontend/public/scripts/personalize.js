@@ -21,6 +21,8 @@ const getPersonalizedSettings = () => {
     'main-color': localStorage.getItem('main-color'),
     'constraint-color': localStorage.getItem('constraint-color'),
     'text-color': localStorage.getItem('text-color'),
+    'font-size': localStorage.getItem('font-size'),
+    'sound-enabled': localStorage.getItem('sound-enabled'),
   }
 
   return options;

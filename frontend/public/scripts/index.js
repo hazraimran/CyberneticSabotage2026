@@ -232,6 +232,8 @@ class UserFactory {
       localStorage.setItem("main-color", this.data.personalizedSettings?.['main-color']);
       localStorage.setItem("constraint-color", this.data.personalizedSettings?.['constraint-color']);
       localStorage.setItem("text-color", this.data.personalizedSettings?.['text-color']);
+      localStorage.setItem("font-size", this.data.personalizedSettings?.['font-size']);
+      localStorage.setItem("sound-enabled", this.data.personalizedSettings?.['sound-enabled']);
     }
   }
 

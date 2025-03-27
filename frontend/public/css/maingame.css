@@ -24,12 +24,13 @@
   margin-top: 10px;
 }
 .chat-container{
-  flex-grow: 1;
+  flex-grow: 3;
   display: flex;
   flex-direction: row;
   justify-content: center;
   position: relative;
   margin: 0rem 1rem;
+  min-height: 300px !important;
 }
 
 .super-image {
@@ -82,12 +83,13 @@
   
 }
 .chat-message{
-  margin-top: 15px;
-  font-size: 1rem;
+  margin-top: 1.2rem;
+  font-size: 1.1rem;
 }
 
 table{
   font-size: 1rem;
+  width: 100%;
 }
 .table-data-padding{
   padding: 5px 10px;
@@ -122,8 +124,8 @@ table{
 }
 
 .hint-button-image{
-  width: 40px;
-  height: 40px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
 }
 
@@ -184,6 +186,7 @@ table{
   align-items: center;
   margin-top: 10px;
   overflow: auto;
+  min-height: 100px;
 }
 
 #number-clues-left{
@@ -248,14 +251,24 @@ table{
   color: var(--text-color);
 }
 
-
+.table-container{
+  flex-grow: 1;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
 @media (max-width: 768px) {
 
-  .info-container{
-    display: none;
-  }
 
+  .table-container{
+    display: block;
+    overflow: auto;
+    height: 50px;
+    flex-grow: 0.5;
+  }
   /* html{
     font-size: 6px;
   }

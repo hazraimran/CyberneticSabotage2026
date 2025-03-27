@@ -9,10 +9,11 @@
   --button-color: rgb(94, 31, 130);
   --button-different-color: #ffff;
   --dark-color: #000000;
+  --font-size: 14px;
 }
 
 html{
-  font-size: 12px;
+  font-size: var(--font-size);
 }
 
 body {
@@ -172,6 +173,8 @@ Text:active{
   background-color: rgb(36, 36, 36);
   padding: 20px;
   overflow: scroll;
+  min-width: 250px;
+  max-height: 100vw;
   
 }
 
@@ -232,17 +235,17 @@ button {
   display: flex;
   justify-content: space-between;
   padding: 0 10px;
-  margin-bottom: 20px;
+  margin-bottom:  1rem;
   border: 2px solid var(--main-color);
   border-radius: 5px;
   color: var(--text-color);
+  font-size: 1rem;
 }
 
 #timer,
 #score,
 #correct-queries {
   color: var(--text-color);
-  font-size: 1.5rem;
   padding: 10px;
   flex-basis: 50%;
   text-align: center;
@@ -253,7 +256,8 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 0 10px;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
 }
 
 #progress-bar-container {

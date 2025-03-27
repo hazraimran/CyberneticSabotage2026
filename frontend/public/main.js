@@ -79,6 +79,7 @@ const DOM = {
   mainColorPicker: document.getElementById('mainColorPicker'),
   constraintColorPicker: document.getElementById('constraintColorPicker'),
   textColorPicker: document.getElementById('TextColorPicker'),
+  fontSizeSlider: document.getElementById('fontSizeSlider'),
 };
 
 /**
@@ -93,7 +94,7 @@ const GameState = {
   progress: GAME_CONFIG.initialProgress,
   flag: false,
   hintCounter: 0,
-  soundEnabled: true,
+  soundEnabled: localStorage.getItem('sound-enabled') === 'true',
   correctQueriesSolved: 0,
   db: null,
   hintsUsed: 0
@@ -266,6 +267,7 @@ function initializeEventListeners() {
   DOM.mainColorPicker.addEventListener('change', setColor);
   DOM.constraintColorPicker.addEventListener('change', setColor);
   DOM.textColorPicker.addEventListener('change', setColor);
+  DOM.fontSizeSlider.addEventListener('input', setFontSize);
   DOM.textarea.addEventListener('keydown', (event) => {
     if (DOM.textarea.value === 'wr-code') {
       DOM.textarea.value = GameData.queryAnswers[GameState.currentQueryIndex];
@@ -559,6 +561,7 @@ function toggleSql() {
 function setSoundOff() {
   GameState.soundEnabled = false;
   const modal = document.getElementById('sound-modal');
+  localStorage.setItem('sound-enabled', 'false');
   modal.style.display = 'none';
 }
 
@@ -569,6 +572,7 @@ function setSoundOff() {
 function setSoundOn() {
   GameState.soundEnabled = true;
   const modal = document.getElementById('sound-modal');
+  localStorage.setItem('sound-enabled', 'true');
   modal.style.display = 'none';
 }
 
@@ -1109,6 +1113,17 @@ function setColor(event) {
     localStorage.setItem('text-color', color);
   }
   
+}
+
+/**
+ * Sets the font size
+ * @function
+ * @param {Event} event - The event object
+ */
+function setFontSize(event) {
+  const fontSize = event.target.value;
+  localStorage.setItem('font-size', fontSize + 'px');
+  document.documentElement.style.fontSize = fontSize + 'px';
 }
 
 /**
