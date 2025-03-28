@@ -936,7 +936,7 @@ function updateHintCounter(change = 0) {
  */
 function gameOver() {
   generateSwalRestart({ swal: {
-    title: 'Game Over',
+    title: 'Mission Failed',
     html: '<h1>RoboTech has fallen. The system has been compromised.</h1><br><p>The enemy now controls the robots. You were our last hope.</p><p>Do you want to launch a counterattack and try again?</p>',
     icon: 'error',
     cancelButtonText: 'Accept Defeat',
