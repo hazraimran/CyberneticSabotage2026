@@ -244,6 +244,7 @@ const SQL_COMMANDS_HTML = {
 
 
 const EXTERNAL_API = window.config.EXTERNAL_API;
+const FEEDBACK_FORM_URL = window.config.FEEDBACK_FORM_URL;
 
 /**
  * Initializes all event listeners for the game
@@ -818,7 +819,8 @@ function endGame() {
  * @function
  */
 function provideFeedback() {
-  window.location.href = "endScreen.html?gameStatus=" + GameState.score;
+
+  window.open(FEEDBACK_FORM_URL, '_blank');
 }
 
 /**
