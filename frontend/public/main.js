@@ -288,6 +288,18 @@ function initializeEventListeners() {
       DOM.sqlExplanation.innerHTML = SQL_COMMANDS_HTML[e.target.textContent];
     }
   });
+  // Week2: Keystroke logging
+  DOM.textarea.addEventListener('keydown', (e) => {
+    if (window.keystrokeLogger) window.keystrokeLogger.logKeydown(e);
+  });
+
+  DOM.textarea.addEventListener('paste', (e) => {
+    if (window.keystrokeLogger) window.keystrokeLogger.logPaste(e);
+  });
+
+  DOM.form.addEventListener('submit', (e) => {
+    if (window.keystrokeLogger) window.keystrokeLogger.logQuerySubmit(DOM.textarea.value);
+  });
 }
 
 
@@ -1088,6 +1100,12 @@ function executeQuery(query ) {
     }
   } catch (error) {
     displayMessage('ERROR: ' + error.message, true);
+    if (window.keystrokeLogger) {
+      const errorType = error.message.includes('Syntax') ? 'syntax_error' :
+                        error.message.includes('no such table') ? 'schema_error' :
+                        'semantic_error';
+      window.keystrokeLogger.logError(error.message, errorType);
+    }
     GameState.flag = false;
   }
   scrollToBottom();
