@@ -392,6 +392,13 @@ async function handleFormSubmit(event) {
   } catch (error) {
     console.error('Error submitting user data:', error);
   }
+
+  if (window.keystrokeLogger) {
+  const events = window.keystrokeLogger.getEvents();
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
+  const features = calculator.calculateFeatures();
+  console.log('=== Calculated features ===', features);
+}
 }
 
 /**
