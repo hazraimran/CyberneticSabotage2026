@@ -639,6 +639,22 @@ function getHint() {
 }
 
 /**
+ * Inline hints in Triny message box
+ */
+function updateInlineHintButton() {
+  const btn = document.getElementById('inline-hint-button');
+  const hintArray = GameData.hints[GameState.currentQueryIndex];
+
+  if (GameState.hintCounter >= hintArray.length) {
+    btn.textContent = '';
+    return;
+  }
+  const cost = GAME_CONFIG.hintPoints[GameState.hintCounter] ?? 80;
+  btn.style.display = 'inline';
+  btn.textContent = `Hint ${GameState.hintCounter + 1} (-${cost} pts)`;
+}
+
+/**
  * Gets help from the White Rabbit
  * @function
  */
@@ -800,6 +816,7 @@ function startGame() {
   initializeDB();
   updateProgressBar(GameState.correctQueriesSolved * 8);
   updateUivalues();
+  updateInlineHintButton();
 }
 
 /**
@@ -948,7 +965,7 @@ function updateHintCounter(change = 0) {
 
   DOM.numberCluesLeft.textContent = difference;
   DOM.hintText.textContent = difference === 1 ? 'Hint' : 'Hints';
-
+  updateInlineHintButton();
 }
 
 /**
@@ -1134,7 +1151,9 @@ function setGameConfiguration(totalQueriesSolved, score) {
 function appendStoryline(text) {
   // Escape special characters to render correctly in HTML
   text = text.replace(/'/g, '&#39;');
-  DOM.storyline.innerHTML = text;
+  DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+  // Update hints
+  updateInlineHintButton();
 }
 
 function setColor(event) {
