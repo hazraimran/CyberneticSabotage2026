@@ -812,6 +812,9 @@ function startGame() {
   appendStoryline(nextQuery);
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
+  // pollSFI
+  setInterval(pollSFI, 2000);
+
   updateScore(0);
   initializeDB();
   updateProgressBar(GameState.correctQueriesSolved * 8);
@@ -1146,6 +1149,47 @@ function toggleMenu() {
 function setGameConfiguration(totalQueriesSolved, score) {
   localStorage.setItem("totalQueriesSolved", totalQueriesSolved);
   localStorage.setItem("score", score);
+}
+
+/**
+ * SFI polling - sends features to DBN every 2 seconds
+ */
+async function pollSFI() {
+  if (!window.keystrokeLogger) return;
+  const events = window.keystrokeLogger.getEvents();
+  if (events.length === 0) return;
+
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
+  const features = calculator.calculateFeatures();
+
+  try {
+    const response = await fetch('http://127.0.0.1:5001/sfi/infer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: localStorage.getItem('user') || 'anonymous',
+        features: features
+      })
+    })
+    const result = await response.json();
+    console.log('SFI result:', result);
+    if (result.trigger_scaffold) {
+      triggerTrinyScaffold(result.dominant_state);
+    }
+  } catch (error) {
+    console.error('SFI polling error:', error);
+  }
+}
+
+/**
+ * Triggers Triny to show affective scaffolding message
+ */
+function triggerTrinyScaffold(state) {
+  const messages = {
+    frustration: "Don't clear the evidence board yet! Take a breath and re-read the prompt carefully.",
+  }
+  const message = messages[state] || "Keep going, Detective!";
+  appendStoryline(message);
 }
 
 function appendStoryline(text) {
