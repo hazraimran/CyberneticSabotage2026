@@ -1168,13 +1168,16 @@ async function pollSFI() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_id: localStorage.getItem('user') || 'anonymous',
-        features: features
+        features: features,
+        query_index: GameState.currentQueryIndex,
+        query_context: GameData.queries[GameState.currentQueryIndex]
       })
-    })
+    });
     const result = await response.json();
     console.log('SFI result:', result);
-    if (result.trigger_scaffold) {
-      triggerTrinyScaffold(result.dominant_state);
+
+    if (result.trigger_scaffold && result.triny_message) {
+      triggerTrinyScaffold(result.triny_message);
     }
   } catch (error) {
     console.error('SFI polling error:', error);
@@ -1184,11 +1187,7 @@ async function pollSFI() {
 /**
  * Triggers Triny to show affective scaffolding message
  */
-function triggerTrinyScaffold(state) {
-  const messages = {
-    frustration: "Don't clear the evidence board yet! Take a breath and re-read the prompt carefully.",
-  }
-  const message = messages[state] || "Keep going, Detective!";
+function triggerTrinyScaffold(message) {
   appendStoryline(message);
 }
 
