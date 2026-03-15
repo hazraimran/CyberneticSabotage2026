@@ -100,6 +100,10 @@ const GameState = {
   hintsUsed: 0
 };
 
+// Rate limiting
+let lastScaffoldTime = 0;
+const SCAFFOLD_COOLDOWN = 60000;
+
 /**
  * Game data containing all queries, answers, hints and validation keys
  * @constant {Object}
@@ -1158,6 +1162,9 @@ async function pollSFI() {
   if (!window.keystrokeLogger) return;
   const events = window.keystrokeLogger.getEvents();
   if (events.length === 0) return;
+  // Rate limiting
+  const now = Date.now();
+  if (now - lastScaffoldTime < SCAFFOLD_COOLDOWN) return;
 
   const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
   const features = calculator.calculateFeatures();
@@ -1188,6 +1195,8 @@ async function pollSFI() {
  * Triggers Triny to show affective scaffolding message
  */
 function triggerTrinyScaffold(message) {
+  // record the scaffold time for rate liming
+  lastScaffoldTime = Date.now();
   appendStoryline(message);
 }
 
