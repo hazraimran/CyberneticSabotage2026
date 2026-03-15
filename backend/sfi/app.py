@@ -97,7 +97,7 @@ def infer():
         sessions[session_id] = DBN()
     
     dbn = sessions[session_id]
-    result = dbn.update(features)
+    result = dbn.update(features, query_index)
     
     # Generate Triny message if needed
     triny_message = None
