@@ -9,6 +9,7 @@ EMISSION_PROBS = {
         "high_backspace": 0.15, # Flow = few deletions
         "high_pause": 0.1, # Flow = few long pauses
         "rapid_resubmission": 0.1, # Flow = not guessing
+        "schema_hovering": 0.2,  # Flow students occasionally check schema
     },
     "frustration": {
         "high_ikl": 0.7, # Frustration = slow/irregular typing
@@ -16,6 +17,7 @@ EMISSION_PROBS = {
         "high_backspace": 0.75, # Frustration = lots of deletion
         "high_pause": 0.7, # Frustration = lots of long pauses
         "rapid_resubmission": 0.6, # Frustration = panic guessing
+        "schema_hovering": 0.5,  # Frustrated students check schema more
     }
 }
 

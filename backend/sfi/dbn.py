@@ -33,6 +33,7 @@ class DBN:
             "high_backspace": features.get("backspace_frequency", 0) > 0.3,
             "high_pause": features.get("pause_count", 0) > t["pause_count"],
             "rapid_resubmission": features.get("rapid_resubmission", 0) > 0,
+            "schema_hovering": features.get("schema_hover_count", 0) > 0,
         }
         
     def compute_emission(self, state: str, signals: dict) -> float:

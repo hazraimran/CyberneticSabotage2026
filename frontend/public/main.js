@@ -304,6 +304,26 @@ function initializeEventListeners() {
   DOM.form.addEventListener('submit', (e) => {
     if (window.keystrokeLogger) window.keystrokeLogger.logQuerySubmit(DOM.textarea.value);
   });
+  
+  // Week7: Mouse hover tracking on Schema panel
+  const schemaPanel = document.querySelector('.table-container');
+  let hoverStartTime = null;
+
+  if (schemaPanel) {
+    schemaPanel.addEventListener('mouseenter', () => {
+      hoverStartTime = Date.now();
+    });
+
+    schemaPanel.addEventListener('mouseleave', () => {
+      if (hoverStartTime) {
+        const duration = Date.now() - hoverStartTime;
+        if (duration > 2000 && window.keystrokeLogger) {
+          window.keystrokeLogger.logSchemaHover(duration);
+        }
+        hoverStartTime = null;
+      }
+    });
+  }
 }
 
 

@@ -5,6 +5,12 @@ class FeatureCalculator {
     }
 
     calculateFeatures() {
+        // Schema hover frequency
+        const schemaHovers = this.events.filter(e => e.event_type === 'schema_hover');
+        const schemaHoverCount = schemaHovers.length;
+        const avgHoverDuration = schemaHovers.length > 0
+        ? schemaHovers.reduce((sum, e) => sum + e.data.duration_ms, 0) / schemaHovers.length
+        : 0;
         return {
             avg_ikl: this.calculateAvgIKL(),
             ikl_std_dev: this.calculateIKLStdDev(),
@@ -16,7 +22,10 @@ class FeatureCalculator {
             rapid_resubmission: this.calculateRapidResubmission(),
             time_to_first_keystroke: this.calculateTimeToFirstKeystroke(),
 
-            total_events: this.events.length
+            total_events: this.events.length,
+
+            schema_hover_count: schemaHoverCount,
+            avg_hover_duration: avgHoverDuration,
         };
     }
 

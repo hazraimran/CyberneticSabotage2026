@@ -91,6 +91,19 @@ class KeystrokeLogger {
         return this.events;
     }
 
+    logSchemaHover(duration) {
+        const now = Date.now();
+        const eventData = {
+            timestamp: new Date(now).toISOString(),
+            event_type: 'schema_hover',
+            data: {
+                duration_ms: duration
+            }
+        };
+        this.events.push(eventData);
+        console.log('Schema hover logged:', eventData);
+    }
+
     reset() {
         console.log('Resetting logger. Total events collected:', this.events.length);
         
