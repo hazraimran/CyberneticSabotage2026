@@ -18,8 +18,15 @@ class DBN:
         # Start with initial probabilities
         self.current_probs = INITIAL_PROBS.copy()
     
-    def extract_signals(self, features: dict, query_index: int = 0) -> dict:
+    def extract_signals(self, features: dict, query_index: int = 0,  baseline: dict = None) -> dict:
         t = QUERY_THRESHOLDS.get(query_index, DEFAULT_THRESHOLDS)
+        
+        # Use z-score for IKL if baseline available, otherwise use fixed threshold
+        if baseline and baseline.get('sd_ikl', 0) > 0:
+            high_ikl = features.get('_z_ikl', 0) > 1.5
+        else:
+            high_ikl = features.get('avg_ikl', 0) > t["avg_ikl"]
+        
         return {
             "high_ikl": features.get("avg_ikl", 0) > t["avg_ikl"],
             "high_pel": features.get("avg_pel", 0) > 5000,
@@ -39,34 +46,34 @@ class DBN:
             prob *= emission if is_high else (1 - emission)
         return prob
     
-    def update(self, features: dict, query_index: int = 0) -> dict:
-        """
-        Core DBN update:
-        P(St | Bt, St-1) = α * P(Bt | St) * Σ P(St | St-1) * P(St-1)
-        """
-        signals = self.extract_signals(features, query_index)
+    def update(self, features: dict, query_index: int = 0, baseline: dict = None) -> dict:
+        # If we have a personal baseline, use z-score to adjust IKL threshold
+        if baseline and baseline.get('sd_ikl', 0) > 0:
+            mean_ikl = baseline['mean_ikl']
+            sd_ikl = baseline['sd_ikl']
+            z_score = (features.get('avg_ikl', 0) - mean_ikl) / sd_ikl
+            features = dict(features)
+            features['_z_ikl'] = z_score
+
+        signals = self.extract_signals(features, query_index, baseline)
         new_probs = {}
-        
+
         for state in self.states:
-            # Temporal context: Σ P(St | St-1) * P(St-1)
             transition = sum(
                 TRANSITION_PROBS[prev][state] * self.current_probs[prev]
                 for prev in self.states
             )
-            # Evidence: P(Bt | St)
             emission = self.compute_emission(state, signals)
-            
             new_probs[state] = emission * transition
-        
-        # Normalize: ensure probabilities sum to 1
+
         total = sum(new_probs.values())
         if total > 0:
             new_probs = {s: p / total for s, p in new_probs.items()}
         else:
             new_probs = INITIAL_PROBS.copy()
-        
+
         self.current_probs = new_probs
-        
+
         return {
             "timestamp": datetime.utcnow().isoformat(),
             "probabilities": new_probs,

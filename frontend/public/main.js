@@ -1159,6 +1159,8 @@ function setGameConfiguration(totalQueriesSolved, score) {
  * SFI polling - sends features to DBN every 2 seconds
  */
 async function pollSFI() {
+  // Z-Score normalization baseline
+  let personalBaseline = null; // {mean_ikl, sd_ikl}
   if (!window.keystrokeLogger) return;
   const events = window.keystrokeLogger.getEvents();
   if (events.length === 0) return;
@@ -1168,6 +1170,7 @@ async function pollSFI() {
 
   const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
   const features = calculator.calculateFeatures();
+  updateBaseline(features);
 
   try {
     const response = await fetch('http://127.0.0.1:5001/sfi/infer', {
@@ -1177,18 +1180,37 @@ async function pollSFI() {
         session_id: localStorage.getItem('user') || 'anonymous',
         features: features,
         query_index: GameState.currentQueryIndex,
-        query_context: GameData.queries[GameState.currentQueryIndex]
+        query_context: GameData.queries[GameState.currentQueryIndex],
+        baseline: personalBaseline
       })
     });
     const result = await response.json();
     console.log('SFI result:', result);
 
     if (result.trigger_scaffold && result.triny_message) {
-      triggerTrinyScaffold(result.triny_message);
+      triggerTrinyScaffold(result.triny_message, result);
     }
   } catch (error) {
     console.error('SFI polling error:', error);
   }
+}
+
+/**
+ * Records the student's personal typing baseline during Query 1.
+ * This baseline (mean IKL and SD) is used to normalize subsequent
+ * queries so the DBN judges each student relative to their own
+ * normal typing rhythm, not a fixed threshold.
+ * Only runs during Query 1 (the simplest task, assumed Flow state).
+ */
+function updateBaseline(features) {
+  if (GameState.currentQueryIndex !== 0) return;
+  if (features.ikl_std_dev === 0) return;
+  
+  personalBaseline = {
+    mean_ikl: features.avg_ikl,
+    sd_ikl: features.ikl_std_dev
+  };
+  console.log('Personal baseline set:', personalBaseline);
 }
 
 /**
@@ -1198,6 +1220,20 @@ function triggerTrinyScaffold(message) {
   // record the scaffold time for rate liming
   lastScaffoldTime = Date.now();
   appendStoryline(message);
+
+  // Log trigger event to MongoDB
+  fetch(`${EXTERNAL_API}/sfi/logTrigger`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: localStorage.getItem('user') || 'anonymous',
+      query_index: GameState.currentQueryIndex,
+      detected_state: result.dominant_state,
+      probabilities: result.probabilities,
+      marker_evidence: result.features,
+      triny_message: message,
+    })
+  }).catch(err => console.error('Failed to log trigger:', err));
 }
 
 function appendStoryline(text) {

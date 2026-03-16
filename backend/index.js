@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import sfiRoutes from "./routes/sfiRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import surveyRoutes from "./routes/surveyRoutes.js";
 import pinRoutes from "./routes/pinRoutes.js";
@@ -22,6 +23,7 @@ app.use(express.json()); //parse json bodies in the request
 
 // Routes
 app.use("/auth", authRoutes);
+app.use("/sfi", sfiRoutes);
 app.use("/users", userRoutes);
 app.use("/survey", surveyRoutes);
 app.use("/pin", pinRoutes);

@@ -88,6 +88,7 @@ def infer():
     session_id = data.get('session_id', 'default')
     features = data.get('features', {})
     query_index = data.get('query_index', 0)
+    baseline = data.get('baseline', None)
     
     if not features:
         return jsonify({'error': 'No features provided'}), 400
@@ -97,7 +98,7 @@ def infer():
         sessions[session_id] = DBN()
     
     dbn = sessions[session_id]
-    result = dbn.update(features, query_index)
+    result = dbn.update(features, query_index, baseline)
     
     # Generate Triny message if needed
     triny_message = None
