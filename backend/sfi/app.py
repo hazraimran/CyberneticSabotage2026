@@ -83,9 +83,10 @@ Rules:
 Generate Triny's responses:"""
 
     message = client.messages.create(
-        model = "claude-sonnet-4-20250514",
+        model="claude-sonnet-4-20250514",
         max_tokens=150,
-        messages = [{"role": "user", "content": prompt}]
+        temperature=0.7,
+        messages=[{"role": "user", "content": prompt}]
     )
     
     return message.content[0].text
