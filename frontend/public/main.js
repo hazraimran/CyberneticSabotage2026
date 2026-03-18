@@ -419,7 +419,7 @@ async function handleFormSubmit(event) {
 
   if (window.keystrokeLogger) {
   const events = window.keystrokeLogger.getEvents();
-  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex);
   const features = calculator.calculateFeatures();
   console.log('=== Calculated features ===', features);
 }
@@ -834,6 +834,7 @@ function startGame() {
   const nextQueryIndex = GameState.currentQueryIndex ?? 0;
   const nextQuery = GameData.queries[nextQueryIndex];
   appendStoryline(nextQuery);
+  if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
   // pollSFI
@@ -858,6 +859,7 @@ function restartGame() {
   GameState.progress = GAME_CONFIG.initialProgress;
   GameState.correctQueriesSolved = 0;
   appendStoryline(GameData.queries[0]);
+  if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
   GameState.currentQueryIndex = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
 
@@ -907,6 +909,7 @@ function getStory(increaseScore = true, query = '') {
     } else {
       const nextQuery = GameData.queries[nextQueryIndex];
       appendStoryline(nextQuery);
+      if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
       DOM.hintCounter = 0;
       GameState.currentQueryIndex = nextQueryIndex;
       if (increaseScore) {
@@ -1188,7 +1191,7 @@ async function pollSFI() {
   const now = Date.now();
   if (now - lastScaffoldTime < SCAFFOLD_COOLDOWN) return;
 
-  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime);
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex);
   const features = calculator.calculateFeatures();
   updateBaseline(features);
 

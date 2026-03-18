@@ -1,7 +1,8 @@
 class FeatureCalculator {
-    constructor(events, questionStartTime) {
+    constructor(events, questionStartTime, queryIndex = 0) {
         this.events = events;
         this.questionStartTime = questionStartTime;
+        this.queryIndex = queryIndex;
     }
 
     calculateFeatures() {
@@ -11,6 +12,26 @@ class FeatureCalculator {
         const avgHoverDuration = schemaHovers.length > 0
         ? schemaHovers.reduce((sum, e) => sum + e.data.duration_ms, 0) / schemaHovers.length
         : 0;
+
+        // Marker 7: TFK (Time to First Keystroke)
+        const keydownEvents = this.events.filter(e => e.event_type === 'keydown');
+        const tfk = keydownEvents.length > 0 && this.questionStartTime
+            ? new Date(keydownEvents[0].timestamp).getTime() - this.questionStartTime
+            : 0;
+        
+        // Marker 4: RAR (Reading-to-Action Ratio)
+        // Expected reading time per query (ms)
+        const EXPECTED_READ_TIME =  {
+            0: 9000, // Q1: 9s
+            1: 54000, // Q2: 54s
+            2: 45000, // Q3: 45s
+            3: 28000, // Q4: 28s
+            4: 82000, // Q5: 82
+            11: 162000 // Q12: 162s
+        };
+        const expectedTime = EXPECTED_READ_TIME[this.queryIndex] ?? 30000;
+        const rar = expectedTime > 0 ? tfk / expectedTime : 0;
+
         return {
             avg_ikl: this.calculateAvgIKL(),
             ikl_std_dev: this.calculateIKLStdDev(),
@@ -20,12 +41,14 @@ class FeatureCalculator {
             error_repetition_count: this.calculateErrorRepetitionCount(),
             paste_frequency: this.calculatePasteFrequency(),
             rapid_resubmission: this.calculateRapidResubmission(),
-            time_to_first_keystroke: this.calculateTimeToFirstKeystroke(),
 
             total_events: this.events.length,
 
             schema_hover_count: schemaHoverCount,
             avg_hover_duration: avgHoverDuration,
+
+            time_to_first_keystroke: tfk,
+            rar: rar,
         };
     }
 

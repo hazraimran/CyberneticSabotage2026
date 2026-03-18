@@ -55,6 +55,10 @@ def generate_triny_message(state, query_index, features):
         evidence.append("frequent long pauses")
     if features.get("rapid_resubmission", 0) > 0:
         evidence.append("rapid resubmission without edits")
+    if features.get("rar", 1) < 0.5:
+        evidence.append("skimmed the prompt too quickly (low reading ratio)")
+    if features.get("time_to_first_keystroke", 0) > 9000:
+        evidence.append("long initial hesitation before typing")
     
     evidence_str = ", ".join(evidence) if evidence else "behavaioral patterns"
     

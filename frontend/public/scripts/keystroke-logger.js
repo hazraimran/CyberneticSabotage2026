@@ -5,6 +5,8 @@ class KeystrokeLogger {
         this.lastErrorTime = null;
         this.attemptNumber = 0;
         this.questionStartTime = Date.now();
+        this.questionStartTime = null;
+        this.firstKeystrokeTime = null;
     }
 
     logKeydown(event) {
@@ -29,6 +31,9 @@ class KeystrokeLogger {
         }
         
         this.events.push(eventData);
+        if (this.firstKeystrokeTime === null) {
+            this.firstKeystrokeTime = now;
+        }
         this.lastKeystrokeTime = now;
         
         console.log('Keystroke logged:', eventData);
@@ -102,6 +107,12 @@ class KeystrokeLogger {
         };
         this.events.push(eventData);
         console.log('Schema hover logged:', eventData);
+    }
+
+    recordQuestionStart() {
+        this.questionStartTime = Date.now();
+        this.firstKeystrokeTime = null;
+        console.log('Question start time recorded:', this.questionStartTime);
     }
 
     reset() {
