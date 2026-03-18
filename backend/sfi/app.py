@@ -30,9 +30,9 @@ QUERY_CONTEXTS = {
 
 THEORETICAL_STRATEGIES = {
     "frustration": "Value Defense - protect the student's ego, remind them their logic is sound",
-    "impulsivity": "Self-Regulation - encourage slowing down and re-reading the prompt",
-    "uncertainty": "Resource Scaffolding - point to the Schema panel for help",
-    "anxiety": "Self-Efficacy - remind them this is a normal challenge",
+    "impulsivity": "Self-Regulation - encourage slowing down and re-reading the prompt carefully",
+    "uncertainty": "Resource Scaffolding - point to the Schema panel for help with column names",
+    "anxiety": "Self-Efficacy - remind them this is a normal challenge, boost confidence",
     "flow": None
 }
 
@@ -55,10 +55,14 @@ def generate_triny_message(state, query_index, features):
         evidence.append("frequent long pauses")
     if features.get("rapid_resubmission", 0) > 0:
         evidence.append("rapid resubmission without edits")
+    if features.get("schema_hover_count", 0) > 0:
+        evidence.append("actively searching the Schema panel")
     if features.get("rar", 1) < 0.5:
-        evidence.append("skimmed the prompt too quickly (low reading ratio)")
+        evidence.append("skimmed the prompt too quickly")
     if features.get("time_to_first_keystroke", 0) > 9000:
         evidence.append("long initial hesitation before typing")
+    if features.get("error_repetition_count", 0) > 3:
+        evidence.append("repeating the same error multiple times")
     
     evidence_str = ", ".join(evidence) if evidence else "behavaioral patterns"
     

@@ -14,11 +14,11 @@ DEFAULT_THRESHOLDS = {"pause_count": 3, "avg_ikl": 500}
 
 class DBN:
     def __init__(self):
-        self.states = ["flow", "frustration"]
+        self.states = ["flow", "frustration", "impulsivity", "uncertainty", "anxiety"]
         # Start with initial probabilities
         self.current_probs = INITIAL_PROBS.copy()
     
-    def extract_signals(self, features: dict, query_index: int = 0,  baseline: dict = None) -> dict:
+    def extract_signals(self, features: dict, query_index: int = 0, baseline: dict = None) -> dict:
         t = QUERY_THRESHOLDS.get(query_index, DEFAULT_THRESHOLDS)
         
         # Use z-score for IKL if baseline available, otherwise use fixed threshold
@@ -28,12 +28,15 @@ class DBN:
             high_ikl = features.get('avg_ikl', 0) > t["avg_ikl"]
         
         return {
-            "high_ikl": features.get("avg_ikl", 0) > t["avg_ikl"],
+            "high_ikl": high_ikl,
             "high_pel": features.get("avg_pel", 0) > 5000,
             "high_backspace": features.get("backspace_frequency", 0) > 0.3,
             "high_pause": features.get("pause_count", 0) > t["pause_count"],
             "rapid_resubmission": features.get("rapid_resubmission", 0) > 0,
             "schema_hovering": features.get("schema_hover_count", 0) > 0,
+            "low_rar": features.get("rar", 1) < 0.5,
+            "high_tfk": features.get("time_to_first_keystroke", 0) > 9000,
+            "high_error_repetition": features.get("error_repetition_count", 0) > 3,
         }
         
     def compute_emission(self, state: str, signals: dict) -> float:
@@ -79,7 +82,12 @@ class DBN:
             "timestamp": datetime.utcnow().isoformat(),
             "probabilities": new_probs,
             "dominant_state": max(new_probs, key=new_probs.get),
-            "trigger_scaffold": new_probs.get("frustration", 0) > 0.75
+            "trigger_scaffold": (
+                new_probs.get("frustration", 0) > 0.75 or
+                new_probs.get("impulsivity", 0) > 0.75 or
+                new_probs.get("uncertainty", 0) > 0.75 or
+                new_probs.get("anxiety", 0) > 0.75
+            )
         }
         
     def reset(self):

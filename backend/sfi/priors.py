@@ -1,41 +1,76 @@
 # Control-Value Theory priors
 # P(Bt | St): likelihood of observing behavior B given state S
 
-# Emission probabilities: how likely each marker is for each state
 EMISSION_PROBS = {
     "flow": {
-        "high_ikl": 0.1, # Flow = steady typing, unlikely to have high IKL
-        "high_pel": 0.1, # Flow = quick recovery from errors
-        "high_backspace": 0.15, # Flow = few deletions
-        "high_pause": 0.1, # Flow = few long pauses
-        "rapid_resubmission": 0.1, # Flow = not guessing
-        "schema_hovering": 0.2,  # Flow students occasionally check schema
+        "high_ikl": 0.1,
+        "high_pel": 0.1,
+        "high_backspace": 0.15,
+        "high_pause": 0.1,
+        "rapid_resubmission": 0.1,
+        "schema_hovering": 0.2,
+        "low_rar": 0.1,
+        "high_tfk": 0.1,
+        "high_error_repetition": 0.1,
     },
     "frustration": {
-        "high_ikl": 0.7, # Frustration = slow/irregular typing
-        "high_pel": 0.8, # Frustration = long pause after error
-        "high_backspace": 0.75, # Frustration = lots of deletion
-        "high_pause": 0.7, # Frustration = lots of long pauses
-        "rapid_resubmission": 0.6, # Frustration = panic guessing
-        "schema_hovering": 0.5,  # Frustrated students check schema more
-    }
+        "high_ikl": 0.7,
+        "high_pel": 0.8,
+        "high_backspace": 0.75,
+        "high_pause": 0.7,
+        "rapid_resubmission": 0.6,
+        "schema_hovering": 0.3,
+        "low_rar": 0.4,
+        "high_tfk": 0.3,
+        "high_error_repetition": 0.7,
+    },
+    "impulsivity": {
+        "high_ikl": 0.1,
+        "high_pel": 0.2,
+        "high_backspace": 0.3,
+        "high_pause": 0.1,
+        "rapid_resubmission": 0.8,
+        "schema_hovering": 0.1,
+        "low_rar": 0.85,
+        "high_tfk": 0.05,
+        "high_error_repetition": 0.5,
+    },
+    "uncertainty": {
+        "high_ikl": 0.5,
+        "high_pel": 0.7,
+        "high_backspace": 0.3,
+        "high_pause": 0.8,
+        "rapid_resubmission": 0.2,
+        "schema_hovering": 0.85,
+        "low_rar": 0.2,
+        "high_tfk": 0.4,
+        "high_error_repetition": 0.4,
+    },
+    "anxiety": {
+        "high_ikl": 0.6,
+        "high_pel": 0.5,
+        "high_backspace": 0.2,
+        "high_pause": 0.6,
+        "rapid_resubmission": 0.2,
+        "schema_hovering": 0.3,
+        "low_rar": 0.2,
+        "high_tfk": 0.9,
+        "high_error_repetition": 0.3,
+    },
 }
 
-# Transition probabilities: P(St | St-1)
-# How likely to stay in or switch states
 TRANSITION_PROBS = {
-    "flow": {
-        "flow": 0.8, # Likely to stay in flow
-        "frustration": 0.2 # Unlikely to switch to frustration
-    },
-    "frustration": {
-        "flow": 0.3, # Can recover to flow
-        "frustration": 0.7 # Likely to stay frustrated
-    }
+    "flow":        {"flow": 0.7, "frustration": 0.1, "impulsivity": 0.1, "uncertainty": 0.05, "anxiety": 0.05},
+    "frustration": {"flow": 0.2, "frustration": 0.6, "impulsivity": 0.1, "uncertainty": 0.05, "anxiety": 0.05},
+    "impulsivity": {"flow": 0.3, "frustration": 0.1, "impulsivity": 0.5, "uncertainty": 0.05, "anxiety": 0.05},
+    "uncertainty": {"flow": 0.2, "frustration": 0.1, "impulsivity": 0.1, "uncertainty": 0.55, "anxiety": 0.05},
+    "anxiety":     {"flow": 0.2, "frustration": 0.1, "impulsivity": 0.1, "uncertainty": 0.1,  "anxiety": 0.5},
 }
 
-# Initial state probabilities
 INITIAL_PROBS = {
-    "flow": 0.7, # Assume student starts in flow
-    "frustration": 0.3
+    "flow": 0.6,
+    "frustration": 0.1,
+    "impulsivity": 0.1,
+    "uncertainty": 0.1,
+    "anxiety": 0.1,
 }
