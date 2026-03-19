@@ -4,11 +4,11 @@ from backend.sfi.priors import EMISSION_PROBS, TRANSITION_PROBS, INITIAL_PROBS
 # Per-query threshold overrides based on SFI architecture document
 QUERY_THRESHOLDS = {
     0:  {"pause_count": 3, "avg_ikl": 500},   # Q1: strict, baseline
-    1:  {"pause_count": 2, "avg_ikl": 500},   # Q2: strict
+    1:  {"pause_count": 2, "avg_ikl": 500, "low_pause_impulsivity": True},   # Q2: low pause = impulsivity trap
     2:  {"pause_count": 4, "avg_ikl": 600},   # Q3: allow more pauses (productive struggle)
-    3:  {"pause_count": 3, "avg_ikl": 500},   # Q4: normal
+    3:  {"pause_count": 3, "avg_ikl": 500, "min_tfk": 15000},   # Q4: TFK < 15s = skimmed prompt
     4:  {"pause_count": 5, "avg_ikl": 600},   # Q5: allow more pauses
-    11: {"pause_count": 6, "avg_ikl": 700},   # Q12: boss level, very lenient
+    11: {"pause_count": 6, "avg_ikl": 700, "tfk_is_flow": True},   # Q12: long TFK = Deep Mental Modeling
 }
 DEFAULT_THRESHOLDS = {"pause_count": 3, "avg_ikl": 500}
 
@@ -35,8 +35,23 @@ class DBN:
             "rapid_resubmission": features.get("rapid_resubmission", 0) > 0,
             "schema_hovering": features.get("schema_hover_count", 0) > 0,
             "low_rar": features.get("rar", 1) < 0.5,
-            "high_tfk": features.get("time_to_first_keystroke", 0) > 9000,
+            "high_tfk": (
+                False if QUERY_THRESHOLDS.get(query_index, {}).get("tfk_is_flow", False)
+                and features.get("time_to_first_keystroke", 0) > 150000
+                else features.get("time_to_first_keystroke", 0) > 9000
+            ),
             "high_error_repetition": features.get("error_repetition_count", 0) > 3,
+            "high_rewrites": features.get("total_rewrites", 0) >= 1,  
+            "low_pause_burst": (
+                features.get("pause_count", 0) < 1
+                and QUERY_THRESHOLDS.get(query_index, {}).get("low_pause_impulsivity", False)
+            ),    
+            "skimmed_prompt": (
+                "min_tfk" in QUERY_THRESHOLDS.get(query_index, {})
+                and features.get("time_to_first_keystroke", 0) < QUERY_THRESHOLDS[query_index]["min_tfk"]
+                and features.get("time_to_first_keystroke", 0) > 0
+            ),  
+            "low_paste": features.get("paste_frequency", 0) == 0,
         }
         
     def compute_emission(self, state: str, signals: dict) -> float:
@@ -84,9 +99,9 @@ class DBN:
             "dominant_state": max(new_probs, key=new_probs.get),
             "trigger_scaffold": (
                 new_probs.get("frustration", 0) > 0.75 or
-                new_probs.get("impulsivity", 0) > 0.75 or
-                new_probs.get("uncertainty", 0) > 0.75 or
-                new_probs.get("anxiety", 0) > 0.75
+                new_probs.get("impulsivity", 0) > 0.55 or
+                new_probs.get("uncertainty", 0) > 0.65 or
+                new_probs.get("anxiety", 0) > 0.65
             )
         }
         

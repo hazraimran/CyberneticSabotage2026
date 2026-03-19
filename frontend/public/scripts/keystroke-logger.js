@@ -36,6 +36,17 @@ class KeystrokeLogger {
         }
         this.lastKeystrokeTime = now;
         
+        // Detect Ctrl+A (select all - intent to delete everything)
+        if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+            const selectAllEvent = {
+                timestamp: new Date(now).toISOString(),
+                event_type: 'select_all',
+                data: { key: event.key }
+            };
+            this.events.push(selectAllEvent);
+            console.log('Select all logged:', selectAllEvent);
+        }
+
         console.log('Keystroke logged:', eventData);
     }
 

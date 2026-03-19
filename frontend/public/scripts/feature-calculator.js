@@ -32,6 +32,10 @@ class FeatureCalculator {
         const expectedTime = EXPECTED_READ_TIME[this.queryIndex] ?? 30000;
         const rar = expectedTime > 0 ? tfk / expectedTime : 0;
 
+        // Marker 3: Total Rewrites (Ctrl+A + Backspace = intent to quit)
+        const selectAllEvents = this.events.filter(e => e.event_type === 'select_all');
+        const rewriteCount = selectAllEvents.length;
+
         return {
             avg_ikl: this.calculateAvgIKL(),
             ikl_std_dev: this.calculateIKLStdDev(),
@@ -49,6 +53,8 @@ class FeatureCalculator {
 
             time_to_first_keystroke: tfk,
             rar: rar,
+
+            total_rewrites: rewriteCount,
         };
     }
 

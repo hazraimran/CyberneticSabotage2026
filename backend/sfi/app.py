@@ -63,6 +63,8 @@ def generate_triny_message(state, query_index, features):
         evidence.append("long initial hesitation before typing")
     if features.get("error_repetition_count", 0) > 3:
         evidence.append("repeating the same error multiple times")
+    if features.get("total_rewrites", 0) >= 1:
+        evidence.append("deleted entire code (Ctrl+A)")
     
     evidence_str = ", ".join(evidence) if evidence else "behavaioral patterns"
     
