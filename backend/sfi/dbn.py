@@ -4,7 +4,7 @@ from backend.sfi.priors import EMISSION_PROBS, TRANSITION_PROBS, INITIAL_PROBS
 # Per-query threshold overrides based on SFI architecture document
 QUERY_THRESHOLDS = {
     0:  {"pause_count": 3, "avg_ikl": 500, "pel_threshold": 5000}, # Q1
-    1:  {"pause_count": 2, "avg_ikl": 500, "low_pause_impulsivity": True, "pel_threshold": 8000}, # Q2
+    1:  {"pause_count": 2, "avg_ikl": 500, "low_pause_impulsivity": True, "pel_threshold": 8000, "tfk_is_flow": True},
     2:  {"pause_count": 4, "avg_ikl": 600, "pel_threshold": 8000, "rar_impulsivity": 0.6}, # Q3
     3:  {"pause_count": 3, "avg_ikl": 500, "min_tfk": 15000, "pel_threshold": 6000, "low_pause_impulsivity": True}, # Q4
     4:  {"pause_count": 5, "avg_ikl": 600, "pel_threshold": 10000, "low_pause_impulsivity": True}, # Q5                                # Q5
@@ -37,7 +37,6 @@ class DBN:
             "low_rar": features.get("rar", 1) < QUERY_THRESHOLDS.get(query_index, DEFAULT_THRESHOLDS).get("rar_impulsivity", 0.5),
             "high_tfk": (
                 False if QUERY_THRESHOLDS.get(query_index, {}).get("tfk_is_flow", False)
-                and features.get("time_to_first_keystroke", 0) > 150000
                 else features.get("time_to_first_keystroke", 0) > 9000
             ),
             "high_error_repetition": features.get("error_repetition_count", 0) > 3,
@@ -102,6 +101,25 @@ class DBN:
             new_probs = {s: p / total for s, p in new_probs.items()}
         else:
             new_probs = INITIAL_PROBS.copy()
+
+        self.current_probs = new_probs
+        
+        # Dominant signal override: force state when key markers are very strong
+        if signals.get("low_rar") and signals.get("rapid_resubmission"):
+            new_probs = {s: 0.02 for s in self.states}
+            new_probs["impulsivity"] = 0.92
+            
+        if signals.get("low_pause_burst") and signals.get("rapid_resubmission"):
+            new_probs = {s: 0.02 for s in self.states}
+            new_probs["impulsivity"] = 0.92
+
+        if signals.get("low_pause_q12") and signals.get("rapid_resubmission"):
+            new_probs = {s: 0.02 for s in self.states}
+            new_probs["impulsivity"] = 0.92
+
+        if signals.get("schema_hovering") and signals.get("high_pel"):
+            new_probs = {s: 0.02 for s in self.states}
+            new_probs["uncertainty"] = 0.92
 
         self.current_probs = new_probs
 
