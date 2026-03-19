@@ -8,7 +8,7 @@ EMISSION_PROBS = {
         "high_backspace": 0.15,
         "high_pause": 0.1,
         "rapid_resubmission": 0.05,
-        "schema_hovering": 0.2,
+        "schema_hovering": 0.1,
         "low_rar": 0.1,
         "high_tfk": 0.1,
         "high_error_repetition": 0.1,
@@ -16,6 +16,8 @@ EMISSION_PROBS = {
         "low_pause_burst": 0.05,
         "skimmed_prompt": 0.1,
         "low_paste": 0.3,
+        "low_pause_q12": 0.3,
+        "productive_pause_q5": 0.85,
     },
     "frustration": {
         "high_ikl": 0.7,
@@ -31,6 +33,8 @@ EMISSION_PROBS = {
         "low_pause_burst": 0.05,
         "skimmed_prompt": 0.2,
         "low_paste": 0.3,
+        "low_pause_q12": 0.1,
+        "productive_pause_q5": 0.1,
     },
     "impulsivity": {
         "high_ikl": 0.1,
@@ -46,6 +50,8 @@ EMISSION_PROBS = {
         "low_pause_burst": 0.95,
         "skimmed_prompt": 0.8,
         "low_paste": 0.85,
+        "low_pause_q12": 0.85,
+        "productive_pause_q5": 0.05,
     },
     "uncertainty": {
         "high_ikl": 0.5,
@@ -53,7 +59,7 @@ EMISSION_PROBS = {
         "high_backspace": 0.3,
         "high_pause": 0.8,
         "rapid_resubmission": 0.2,
-        "schema_hovering": 0.85,
+        "schema_hovering": 0.92,
         "low_rar": 0.2,
         "high_tfk": 0.4,
         "high_error_repetition": 0.4,
@@ -61,6 +67,8 @@ EMISSION_PROBS = {
         "low_pause_burst": 0.02,
         "skimmed_prompt": 0.1,
         "low_paste": 0.3,
+        "low_pause_q12": 0.1,
+        "productive_pause_q5": 0.2,
     },
     "anxiety": {
         "high_ikl": 0.6,
@@ -76,6 +84,8 @@ EMISSION_PROBS = {
         "low_pause_burst": 0.05,
         "skimmed_prompt": 0.05,
         "low_paste": 0.3,
+        "low_pause_q12": 0.1,
+        "productive_pause_q5": 0.1,
     },
 }
 

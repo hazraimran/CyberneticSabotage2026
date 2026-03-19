@@ -3,14 +3,14 @@ from backend.sfi.priors import EMISSION_PROBS, TRANSITION_PROBS, INITIAL_PROBS
 
 # Per-query threshold overrides based on SFI architecture document
 QUERY_THRESHOLDS = {
-    0:  {"pause_count": 3, "avg_ikl": 500},   # Q1: strict, baseline
-    1:  {"pause_count": 2, "avg_ikl": 500, "low_pause_impulsivity": True},   # Q2: low pause = impulsivity trap
-    2:  {"pause_count": 4, "avg_ikl": 600},   # Q3: allow more pauses (productive struggle)
-    3:  {"pause_count": 3, "avg_ikl": 500, "min_tfk": 15000},   # Q4: TFK < 15s = skimmed prompt
-    4:  {"pause_count": 5, "avg_ikl": 600},   # Q5: allow more pauses
-    11: {"pause_count": 6, "avg_ikl": 700, "tfk_is_flow": True},   # Q12: long TFK = Deep Mental Modeling
+    0:  {"pause_count": 3, "avg_ikl": 500, "pel_threshold": 5000},                                    # Q1
+    1:  {"pause_count": 2, "avg_ikl": 500, "low_pause_impulsivity": True, "pel_threshold": 8000},     # Q2
+    2:  {"pause_count": 4, "avg_ikl": 600, "pel_threshold": 8000},                                    # Q3
+    3:  {"pause_count": 3, "avg_ikl": 500, "min_tfk": 15000, "pel_threshold": 6000},                  # Q4
+    4:  {"pause_count": 5, "avg_ikl": 600, "pel_threshold": 10000},                                   # Q5
+    11: {"pause_count": 6, "avg_ikl": 700, "tfk_is_flow": True, "pel_threshold": 12000},              # Q12
 }
-DEFAULT_THRESHOLDS = {"pause_count": 3, "avg_ikl": 500}
+DEFAULT_THRESHOLDS = {"pause_count": 3, "avg_ikl": 500, "pel_threshold": 5000}
 
 class DBN:
     def __init__(self):
@@ -29,7 +29,7 @@ class DBN:
         
         return {
             "high_ikl": high_ikl,
-            "high_pel": features.get("avg_pel", 0) > 5000,
+            "high_pel": features.get("avg_pel", 0) > t.get("pel_threshold", 5000),
             "high_backspace": features.get("backspace_frequency", 0) > 0.3,
             "high_pause": features.get("pause_count", 0) > t["pause_count"],
             "rapid_resubmission": features.get("rapid_resubmission", 0) > 0,
@@ -52,6 +52,14 @@ class DBN:
                 and features.get("time_to_first_keystroke", 0) > 0
             ),  
             "low_paste": features.get("paste_frequency", 0) == 0,
+            "low_pause_q12": (
+                query_index == 11
+                and features.get("pause_count", 0) < 2
+            ),
+            "productive_pause_q5": (
+                query_index == 4
+                and 3 <= features.get("pause_count", 0) <= 5
+            ),
         }
         
     def compute_emission(self, state: str, signals: dict) -> float:
