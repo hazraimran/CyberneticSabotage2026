@@ -1196,7 +1196,7 @@ async function pollSFI() {
   updateBaseline(features);
 
   try {
-    const response = await fetch('http://127.0.0.1:5001/sfi/infer', {
+      const response = await fetch('https://cybernetic-sabotage-sfi.onrender.com/sfi/infer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
