@@ -4,6 +4,7 @@
 EMISSION_PROBS = {
     "flow": {
         "high_ikl": 0.1,
+        "low_ikl_cv": 0.8,
         "high_pel": 0.1,
         "high_backspace": 0.15,
         "high_pause": 0.1,
@@ -22,6 +23,7 @@ EMISSION_PROBS = {
     },
     "frustration": {
         "high_ikl": 0.7,
+        "low_ikl_cv": 0.1,
         "high_pel": 0.8,
         "high_backspace": 0.75,
         "high_pause": 0.7,
@@ -40,6 +42,7 @@ EMISSION_PROBS = {
     },
     "impulsivity": {
         "high_ikl": 0.1,
+        "low_ikl_cv": 0.2,
         "high_pel": 0.2,
         "high_backspace": 0.3,
         "high_pause": 0.1,
@@ -58,6 +61,7 @@ EMISSION_PROBS = {
     },
     "uncertainty": {
         "high_ikl": 0.5,
+        "low_ikl_cv": 0.2,
         "high_pel": 0.7,
         "high_backspace": 0.3,
         "high_pause": 0.8,
@@ -76,6 +80,7 @@ EMISSION_PROBS = {
     },
     "anxiety": {
         "high_ikl": 0.6,
+        "low_ikl_cv": 0.2,
         "high_pel": 0.5,
         "high_backspace": 0.2,
         "high_pause": 0.6,

@@ -29,6 +29,7 @@ class DBN:
         
         return {
             "high_ikl": high_ikl,
+            "low_ikl_cv": features.get("ikl_cv", 1) < 0.2,  # Flow indicator
             "high_pel": features.get("avg_pel", 0) > t.get("pel_threshold", 5000),
             "high_backspace": features.get("backspace_frequency", 0) > t.get("backspace_threshold", 0.3),
             "high_pause": features.get("pause_count", 0) > t["pause_count"],

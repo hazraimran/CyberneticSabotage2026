@@ -104,6 +104,21 @@ const GameState = {
 let lastScaffoldTime = 0;
 const SCAFFOLD_COOLDOWN = 60000;
 
+// Tab focus tracking for RAR calculation
+let tabHiddenTime = 0;
+let tabHiddenStart = null;
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    tabHiddenStart = Date.now();
+  } else {
+    if (tabHiddenStart) {
+      tabHiddenTime += Date.now() - tabHiddenStart;
+      tabHiddenStart = null;
+    }
+  }
+});
+
 /**
  * Game data containing all queries, answers, hints and validation keys
  * @constant {Object}
@@ -419,7 +434,7 @@ async function handleFormSubmit(event) {
 
   if (window.keystrokeLogger) {
   const events = window.keystrokeLogger.getEvents();
-  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex);
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
   const features = calculator.calculateFeatures();
   console.log('=== Calculated features ===', features);
 }
@@ -835,6 +850,8 @@ function startGame() {
   const nextQuery = GameData.queries[nextQueryIndex];
   appendStoryline(nextQuery);
   if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+  tabHiddenTime = 0;
+  tabHiddenStart = null;
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
   // pollSFI
@@ -860,6 +877,8 @@ function restartGame() {
   GameState.correctQueriesSolved = 0;
   appendStoryline(GameData.queries[0]);
   if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+  tabHiddenTime = 0;
+  tabHiddenStart = null;
   GameState.currentQueryIndex = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
 
@@ -910,6 +929,8 @@ function getStory(increaseScore = true, query = '') {
       const nextQuery = GameData.queries[nextQueryIndex];
       appendStoryline(nextQuery);
       if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+      tabHiddenTime = 0;
+      tabHiddenStart = null;
       DOM.hintCounter = 0;
       GameState.currentQueryIndex = nextQueryIndex;
       if (increaseScore) {
@@ -1191,7 +1212,7 @@ async function pollSFI() {
   const now = Date.now();
   if (now - lastScaffoldTime < SCAFFOLD_COOLDOWN) return;
 
-  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex);
+  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
   const features = calculator.calculateFeatures();
   updateBaseline(features);
 

@@ -3,6 +3,7 @@ class FeatureCalculator {
         this.events = events;
         this.questionStartTime = questionStartTime;
         this.queryIndex = queryIndex;
+        this.tabHiddenTime = tabHiddenTime;
     }
 
     calculateFeatures() {
@@ -16,7 +17,7 @@ class FeatureCalculator {
         // Marker 7: TFK (Time to First Keystroke)
         const keydownEvents = this.events.filter(e => e.event_type === 'keydown');
         const tfk = keydownEvents.length > 0 && this.questionStartTime
-            ? new Date(keydownEvents[0].timestamp).getTime() - this.questionStartTime
+            ? new Date(keydownEvents[0].timestamp).getTime() - this.questionStartTime - this.tabHiddenTime
             : 0;
         
         // Marker 4: RAR (Reading-to-Action Ratio)
@@ -35,6 +36,11 @@ class FeatureCalculator {
         // Marker 3: Total Rewrites (Ctrl+A + Backspace = intent to quit)
         const selectAllEvents = this.events.filter(e => e.event_type === 'select_all');
         const rewriteCount = selectAllEvents.length;
+
+        // IKL Coefficient of Variation (CV = SD/Mean) per Final Checklist
+        const ikl_cv = this.calculateAvgIKL() > 0 
+        ? this.calculateIKLStdDev() / this.calculateAvgIKL() 
+        : 0;
 
         return {
             avg_ikl: this.calculateAvgIKL(),
@@ -55,6 +61,8 @@ class FeatureCalculator {
             rar: rar,
 
             total_rewrites: rewriteCount,
+
+            ikl_cv: ikl_cv,
         };
     }
 
