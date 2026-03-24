@@ -1239,7 +1239,7 @@ function updateBaseline(features) {
 /**
  * Triggers Triny to show affective scaffolding message
  */
-function triggerTrinyScaffold(message) {
+function triggerTrinyScaffold(message, result) {
   // record the scaffold time for rate liming
   lastScaffoldTime = Date.now();
   appendStoryline(message);
