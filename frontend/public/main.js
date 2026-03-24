@@ -1253,7 +1253,7 @@ function triggerTrinyScaffold(message, result) {
       query_index: GameState.currentQueryIndex,
       detected_state: result.dominant_state,
       probabilities: result.probabilities,
-      marker_evidence: result.features,
+      marker_evidence: result.probabilities || {},
       triny_message: message,
     })
   }).catch(err => console.error('Failed to log trigger:', err));
