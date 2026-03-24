@@ -16,9 +16,9 @@ class FeatureCalculator {
 
         // Marker 7: TFK (Time to First Keystroke)
         const keydownEvents = this.events.filter(e => e.event_type === 'keydown');
-        const tfk = keydownEvents.length > 0 && this.questionStartTime
+        const tfk = Math.max(0, keydownEvents.length > 0 && this.questionStartTime
             ? new Date(keydownEvents[0].timestamp).getTime() - this.questionStartTime - this.tabHiddenTime
-            : 0;
+            : 0);
         
         // Marker 4: RAR (Reading-to-Action Ratio)
         // Expected reading time per query (ms)
