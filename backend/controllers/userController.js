@@ -23,9 +23,10 @@ const submitUserData = async (req, res) => {
   try {
       // Find or create user document
       let user = await User.findOne({ username });
+
       if (!user) {
-          user = new User({ username, totalQueriesSolved: 0});
-      }         
+          return res.status(404).json({ error: "User not found" });
+      }   
       //update score
       user.score=score;
       
