@@ -16,6 +16,8 @@
   font-weight: bold;
   text-decoration: underline;
 }
+
+
 .inner-box-side{
   display: flex;
   flex-direction: row;
@@ -23,6 +25,7 @@
   height: 30%;
   margin-top: 10px;
 }
+
 .chat-container{
   flex-grow: 3;
   display: flex;
@@ -32,11 +35,14 @@
   margin: 0rem 1rem;
 }
 
+
 .super-image {
   border-radius: 50%;
   border: 2px solid var(--main-color);
   box-shadow: 0px 0px 5px 5px rgba(229, 223, 223, 0.5);
 }
+
+
 .trini-image{
   position: absolute;
   top: 0;
@@ -46,6 +52,7 @@
   /* box-shadow: 0px 0px 5px 5px  var(--main-color); */
   animation: glow 1s ease-in-out infinite alternate;
 }
+
 
 .hacker-image{
   width: 30px;
@@ -58,6 +65,7 @@
   transition: all 0.3s ease;
   box-shadow: 0px 0px 10px 10px  var(--main-color);
 }
+
 .chat-image{
   display: flex;
   opacity: 0.8;
@@ -67,6 +75,7 @@
   left: 0;
   top: 0;
 }
+
 .chat-content{
   position: absolute;
   display: flex;
@@ -77,13 +86,33 @@
   padding-left: 20px;
   text-align: left;
   margin-top: 3rem;
+  /*
   height: 60%;
+  */
+
+  height: 145px;
+
+  /*
   overflow: auto;
-  
+  */
+  overflow: hidden;
+  /*
+  add
+  */
+  box-sizing: border-box;
 }
+
 .chat-message{
   margin-top: 1.2rem;
   font-size: 1.1rem;
+
+  /* add for span*/
+  position: relative;
+  padding-right: 36px; 
+  padding-bottom: 28px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 table{
@@ -297,4 +326,131 @@ table{
   } */
 
 
+}
+
+/* span */
+.chat-message{
+  position: relative;
+}
+
+#triny-text{
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+#expand-triny-btn{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: black;
+  border: 1px solid var(--main-color);
+  border-radius: 4px;
+
+  color: var(--main-color);
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+  z-index: 9999;
+}
+
+#expand-triny-btn:hover{
+  opacity: 0.8;
+}
+
+.triny-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.triny-modal.show {
+  display: block;
+}
+
+.triny-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 72%;
+  max-width: 950px;
+  min-height: 280px;
+  max-height: 78vh;
+
+  background: rgba(36, 36, 36, 0.96);
+  color: var(--main-color);
+  border-radius: 18px;
+  padding: 34px 38px;
+  box-sizing: border-box;
+
+  border: 2px solid var(--main-color);
+  box-shadow:
+    0 0 12px var(--main-color),
+    0 0 28px rgba(0, 255, 0, 0.45),
+    inset 0 0 18px rgba(0, 255, 0, 0.18);
+
+  overflow: hidden;
+}
+
+.triny-modal-content h2 {
+  margin: 0 0 18px 0;
+  font-size: 2.3rem;
+  font-weight: bold;
+  color: var(--main-color);
+}
+
+#triny-modal-text {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  max-height: 52vh;
+  padding-right: 10px;
+}
+
+#close-triny-modal {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--main-color);
+  line-height: 1;
+}
+
+.triny-modal-header{
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.triny-modal-avatar{
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 2px solid var(--main-color);
+
+  box-shadow:
+    0 0 10px var(--main-color),
+    0 0 25px rgba(0,255,0,0.5);
 }

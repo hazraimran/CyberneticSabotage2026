@@ -6,6 +6,7 @@ const questionSchema = mongoose.Schema({
     hintsUsed: { type: Number, required: true },
     query: { type: String },
     isCorrect: { type: Boolean },
+    features: { type: Object, default: {} },  // keystroke features
 });
 
 const userSchema = mongoose.Schema(

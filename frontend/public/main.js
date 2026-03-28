@@ -371,14 +371,14 @@ async function initializeGame() {
  * @param {number} score - Current score
  * @returns {Promise<void>}
  */
-async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score) {
+async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, features = {}) {
   if (!username || queryTime === undefined || queryIndex === undefined || hintsUsed === undefined) {
     return;
   }
 
   const personalizedSettings = getPersonalizedSettings();
 
-  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score,  personalizedSettings};
+  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features };
   try {
     const response = await fetch(`${EXTERNAL_API}/users/submitUserData`, {
       method: 'POST',
@@ -427,7 +427,10 @@ async function handleFormSubmit(event) {
 
   // add push to database over here
   try {
-    await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score);
+    const events = window.keystrokeLogger ? window.keystrokeLogger.getEvents() : [];
+    const calculator = new FeatureCalculator(events, window.keystrokeLogger?.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
+    const features = calculator.calculateFeatures();
+    await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score, features);
   } catch (error) {
     console.error('Error submitting user data:', error);
   }
@@ -1345,4 +1348,26 @@ function updateUivalues(){
  */
 initializeGame();
 
+/**
+ * span
+ */
+window.openTrinyModal = function () {
+  const modal = document.getElementById("triny-modal");
+  const modalText = document.getElementById("triny-modal-text");
+  const originalText = document.getElementById("triny-text");
 
+  if (!modal || !modalText || !originalText) {
+    console.error("Modal elements missing");
+    return;
+  }
+
+  modalText.textContent = originalText.textContent || "";
+  modal.classList.add("show");
+};
+
+window.closeTrinyModal = function () {
+  const modal = document.getElementById("triny-modal");
+  if (modal) {
+    modal.classList.remove("show");
+  }
+};
