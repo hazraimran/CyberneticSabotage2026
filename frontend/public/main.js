@@ -239,7 +239,7 @@ const GameData = {
     [1, 'Under Repair', 'This robot model is undergoing repair due to its defaulty patterns', 5, 7]
   ],
   [
-    [1, 'Thomas', 'Anderson', '2022-06-12 10:25:00', 4]
+    [7, 'Laksh', 'Agarwal', '2023-07-21 15:30:00', 7]
   ]
 ]
 };
