@@ -108,6 +108,12 @@ const SCAFFOLD_COOLDOWN = 60000;
 let tabHiddenTime = 0;
 let tabHiddenStart = null;
 
+// repeated hints
+let lastSubmittedQuery = '';
+
+// Triny messages overlapped with queries
+let currentQueryText = '';
+
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     tabHiddenStart = Date.now();
@@ -125,7 +131,7 @@ document.addEventListener('visibilitychange', () => {
  */
 const GameData = {
   queries: [
-  " Detective, your first mission is to retrieve all reported incidents from the 'Incident' database. Let's see what we're dealing with!",
+  " Detective, your first mission is to retrieve all reported incidents from the 'Incident' table. Let's see what we're dealing with!",
   " Great job, Detective! Now, let's track down the most recent incident. Retrieve the latest reported case from the <strong>Incident</strong> table and display all its details. Stay sharp!",
   " We're closing in! Identify which robot models have been involved in incidents. Count the number of incidents per model and return only two values: the robot model and the incident count (<strong>IncidentCount</strong>). Make sure to include all robot models, even those with zero incidents.",
   " Time to check our system updates. Count how many robots have been updated in the past week (Assume today is 2023-07-24). Return this count as 'NumberOfUpdatedRobots'.",
@@ -371,14 +377,14 @@ async function initializeGame() {
  * @param {number} score - Current score
  * @returns {Promise<void>}
  */
-async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score) {
+async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, features = {}) {
   if (!username || queryTime === undefined || queryIndex === undefined || hintsUsed === undefined) {
     return;
   }
 
   const personalizedSettings = getPersonalizedSettings();
 
-  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score,  personalizedSettings};
+  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features};
   try {
     const response = await fetch(`${EXTERNAL_API}/users/submitUserData`, {
       method: 'POST',
@@ -427,17 +433,14 @@ async function handleFormSubmit(event) {
 
   // add push to database over here
   try {
-    await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score);
-  } catch (error) {
-    console.error('Error submitting user data:', error);
-  }
-
-  if (window.keystrokeLogger) {
-  const events = window.keystrokeLogger.getEvents();
-  const calculator = new FeatureCalculator(events, window.keystrokeLogger.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
-  const features = calculator.calculateFeatures();
-  console.log('=== Calculated features ===', features);
-}
+      const events = window.keystrokeLogger ? window.keystrokeLogger.getEvents() : [];
+      const calculator = new FeatureCalculator(events, window.keystrokeLogger?.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
+      const features = calculator.calculateFeatures();
+      console.log('=== Calculated features ===', features);
+      await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score, features);
+    } catch (error) {
+      console.error('Error submitting user data:', error);
+    }
 }
 
 /**
@@ -531,6 +534,13 @@ function displayResults(result) {
   table.appendChild(thead);
   table.appendChild(tbody);
   queryWrapper.appendChild(table);
+
+  const rowCount = document.createElement('p');
+  rowCount.textContent = `${result.values.length} row(s) returned`;
+  rowCount.style.color = '#00ff00';
+  rowCount.style.fontSize = '0.85em';
+  rowCount.style.marginTop = '4px';
+  queryWrapper.appendChild(rowCount);
 }
 
 /**
@@ -824,7 +834,9 @@ function getAgentName() {
  * @function
  */
 function startGame() {
-  GameState.startTime = Date.now();
+  const savedStartTime = localStorage.getItem('startTime');
+  GameState.startTime = savedStartTime ? parseInt(savedStartTime) : Date.now();
+  if (!savedStartTime) localStorage.setItem('startTime', GameState.startTime);
   let score = localStorage.getItem('score');
   let agentName = getAgentName();
   DOM.agentNameDisplay.textContent = agentName;
@@ -872,6 +884,7 @@ function restartGame() {
   GameState.queryHistory = [];
   DOM.displayText.innerHTML = '';
   GameState.startTime = Date.now();
+  localStorage.setItem('startTime', GameState.startTime);
   GameState.score = GAME_CONFIG.initialScore;
   GameState.progress = GAME_CONFIG.initialProgress;
   GameState.correctQueriesSolved = 0;
@@ -951,6 +964,8 @@ function getStory(increaseScore = true, query = '') {
           timer: 2000,
         }).then(() => {
           setGameConfiguration(GameState.correctQueriesSolved, GameState.score);
+          updateInlineHintButton();
+          updateUivalues();
         });
       }
       updateProgressBar(8);
@@ -960,7 +975,21 @@ function getStory(increaseScore = true, query = '') {
     
     if (!isSelectQuery(query)) {
       appendStoryline('Oops! Please try again.' + currentQuery);
-      updateScore(-10);
+      if (query !== lastSubmittedQuery) {
+        updateScore(-10);
+        Swal.fire({
+          title: '-10 Points',
+          text: 'Incorrect query. Each unique incorrect submission deducts 10 points.',
+          icon: 'warning',
+          background: '#000',
+          color: '#ff0000',
+          toast: true,
+          position: 'top',
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      }
+      lastSubmittedQuery = query;
     }
   }
 }
@@ -1162,6 +1191,9 @@ function executeQuery(query ) {
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
+      } else if (GameState.currentQueryIndex === 10) {
+        const results2 = GameState.db.exec('SELECT * FROM Repair;');
+        GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
       } else {
         GameState.flag = validateResult('', GameState.currentQueryIndex)
       }
@@ -1281,10 +1313,16 @@ function triggerTrinyScaffold(message, result) {
 }
 
 function appendStoryline(text) {
-  // Escape special characters to render correctly in HTML
   text = text.replace(/'/g, '&#39;');
-  DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
-  // Update hints
+  
+  const isQueryText = GameData.queries.some(q => q.replace(/'/g, '&#39;') === text);
+  
+  if (isQueryText) {
+    currentQueryText = text;
+    DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+  } else {
+    DOM.storyline.innerHTML = text + '<hr style="border-color: #00ff00; margin: 8px 0;"><small style="opacity: 0.8;">' + currentQueryText + '</small> <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+  }
   updateInlineHintButton();
 }
 
