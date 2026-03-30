@@ -108,6 +108,12 @@ const SCAFFOLD_COOLDOWN = 60000;
 let tabHiddenTime = 0;
 let tabHiddenStart = null;
 
+// repeated queries points deduction
+let lastSubmittedQuery = '';
+
+// Triny message overlap with queries
+let currentQueryText = '';
+
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     tabHiddenStart = Date.now();
@@ -125,7 +131,7 @@ document.addEventListener('visibilitychange', () => {
  */
 const GameData = {
   queries: [
-  " Detective, your first mission is to retrieve all reported incidents from the 'Incident' database. Let's see what we're dealing with!",
+  " Detective, your first mission is to retrieve all reported incidents from the 'Incident' table. Let's see what we're dealing with!",
   " Great job, Detective! Now, let's track down the most recent incident. Retrieve the latest reported case from the <strong>Incident</strong> table and display all its details. Stay sharp!",
   " We're closing in! Identify which robot models have been involved in incidents. Count the number of incidents per model and return only two values: the robot model and the incident count (<strong>IncidentCount</strong>). Make sure to include all robot models, even those with zero incidents.",
   " Time to check our system updates. Count how many robots have been updated in the past week (Assume today is 2023-07-24). Return this count as 'NumberOfUpdatedRobots'.",
@@ -153,10 +159,10 @@ const GameData = {
   'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\';'
   ],
   hints: [
-  ['start with the basics. Use the <strong>SELECT</strong> statement to pull data from the <strong>Incident</strong> table.', 'hink like a pro. Structure your query as: SELECT _ FROM [TableName]. You’re almost there!'],
+  ['start with the basics. Use the <strong>SELECT</strong> statement to pull data from the <strong>Incident</strong> table.', 'Think like a pro. Structure your query as: SELECT _ FROM [TableName]. You’re almost there!'],
   ['time is key! To find the most recent incident, focus on the <strong>timeStamp</strong>. Try using the <strong>LIMIT</strong> keyword.', 'Sort the <strong>timeStamp</strong> in descending order (<strong>DESC</strong>) to bring the latest case to the top.'],
   ['first, connect the <strong>Robot</strong> and <strong>Incident</strong> tables using a <strong>LEFT JOIN</strong> to ensure all robot models are included.', 'Now, use <strong>GROUP BY Model</strong> to group the robots and count incidents for each one.'],
-  ['focus on the <strong>lastUpdateOn</strong> column to track recent updates. Use a condition to filter for the past 7 days.', 'o ensure accuracy, use <strong>DISTINCT</strong> to count unique <strong>robotIDs</strong> updated within the given date range.'],
+  ['focus on the <strong>lastUpdateOn</strong> column to track recent updates. Use a condition to filter for the past 7 days.', 'To ensure accuracy, use <strong>DISTINCT</strong> to count unique <strong>robotIDs</strong> updated within the given date range.'],
   ['start by using a subquery to find employee IDs of those who updated robots in the past 7 days.', 'Next, filter the employee records using <strong>IN</strong> to get their full names and unique IDs.'],
   ['start by updating the robots! Use <strong>UPDATE</strong> to set the <strong>status</strong> to <strong>Under Repair</strong> for those updated in the past 7 days.', 'After marking them, retrieve and display all robot details…Just like in your first mission.'],
   ['track down the employee with the most robot updates! Use <strong>COUNT(*)</strong> and <strong>GROUP BY lastUpdatedByEmpID</strong> to count updates per employee.', 'Now, sort the results in descending order with <strong>ORDER BY COUNT(*) DESC</strong> to find the top whistleblower.', 'Use <strong>LIMIT 1</strong> to return only the employee with the highest number of updates.'],
@@ -534,6 +540,18 @@ function displayResults(result) {
   table.appendChild(thead);
   table.appendChild(tbody);
   queryWrapper.appendChild(table);
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  queryWrapper.appendChild(table);
+
+  // Display row count
+  const rowCount = document.createElement('p');
+  rowCount.textContent = `${result.values.length} row(s) returned`;
+  rowCount.style.color = '#00ff00';
+  rowCount.style.fontSize = '0.85em';
+  rowCount.style.marginTop = '4px';
+  queryWrapper.appendChild(rowCount);
 }
 
 /**
@@ -827,7 +845,9 @@ function getAgentName() {
  * @function
  */
 function startGame() {
-  GameState.startTime = Date.now();
+  const savedStartTime = localStorage.getItem('startTime');
+  GameState.startTime = savedStartTime ? parseInt(savedStartTime) : Date.now();
+  if (!savedStartTime) localStorage.setItem('startTime', GameState.startTime);
   let score = localStorage.getItem('score');
   let agentName = getAgentName();
   DOM.agentNameDisplay.textContent = agentName;
@@ -875,6 +895,7 @@ function restartGame() {
   GameState.queryHistory = [];
   DOM.displayText.innerHTML = '';
   GameState.startTime = Date.now();
+  localStorage.setItem('startTime', GameState.startTime);
   GameState.score = GAME_CONFIG.initialScore;
   GameState.progress = GAME_CONFIG.initialProgress;
   GameState.correctQueriesSolved = 0;
@@ -954,6 +975,8 @@ function getStory(increaseScore = true, query = '') {
           timer: 2000,
         }).then(() => {
           setGameConfiguration(GameState.correctQueriesSolved, GameState.score);
+          updateInlineHintButton();
+          updateUivalues();
         });
       }
       updateProgressBar(8);
@@ -963,7 +986,21 @@ function getStory(increaseScore = true, query = '') {
     
     if (!isSelectQuery(query)) {
       appendStoryline('Oops! Please try again.' + currentQuery);
-      updateScore(-10);
+      if (query !== lastSubmittedQuery) {
+        updateScore(-10);
+        Swal.fire({
+          title: '-10 Points',
+          text: 'Incorrect query. Each unique incorrect submission deducts 10 points.',
+          icon: 'warning',
+          background: '#000',
+          color: '#ff0000',
+          toast: true,
+          position: 'top',
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      }
+      lastSubmittedQuery = query;
     }
   }
 }
@@ -1165,6 +1202,9 @@ function executeQuery(query ) {
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
+      } else if (GameState.currentQueryIndex === 10) {
+        const results2 = GameState.db.exec('SELECT * FROM Repair;');
+        GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
       } else {
         GameState.flag = validateResult('', GameState.currentQueryIndex)
       }
@@ -1284,10 +1324,18 @@ function triggerTrinyScaffold(message, result) {
 }
 
 function appendStoryline(text) {
-  // Escape special characters to render correctly in HTML
   text = text.replace(/'/g, '&#39;');
-  DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
-  // Update hints
+  
+  // Check if this is a query text (from GameData.queries) or a Triny message
+  const isQueryText = GameData.queries.includes(text.replace(/&#39;/g, "'"));
+  
+  if (isQueryText) {
+    currentQueryText = text;
+    DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+  } else {
+    // Triny message - show it but keep query text below
+    DOM.storyline.innerHTML = text + '<hr style="border-color: #00ff00; margin: 8px 0;"><small style="opacity: 0.8;">' + currentQueryText + '</small> <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+  }
   updateInlineHintButton();
 }
 
