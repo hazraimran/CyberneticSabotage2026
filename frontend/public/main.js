@@ -837,8 +837,9 @@ function getAgentName() {
  */
 function startGame() {
   const savedStartTime = localStorage.getItem('startTime');
-  GameState.startTime = savedStartTime ? parseInt(savedStartTime) : Date.now();
-  if (!savedStartTime) localStorage.setItem('startTime', GameState.startTime);
+  const savedProgress = parseInt(localStorage.getItem('totalQueriesSolved') ?? 0);
+  GameState.startTime = (savedStartTime && savedProgress > 0) ? parseInt(savedStartTime) : Date.now();
+  localStorage.setItem('startTime', GameState.startTime);
   let score = localStorage.getItem('score');
   let agentName = getAgentName();
   DOM.agentNameDisplay.textContent = agentName;
