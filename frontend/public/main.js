@@ -279,7 +279,9 @@ function initializeEventListeners() {
   DOM.form.addEventListener('submit', handleFormSubmit);
   DOM.restartButton.addEventListener('click', askForRestart);
   DOM.hintButton.onclick = yesButtonHandler;
-  DOM.helpButton.onclick = getHelp;
+  /* DOM.helpButton.onclick = getHelp; */
+  /* Remove Tutotial */
+  if (DOM.helpButton) DOM.helpButton.onclick = getHelp;
   DOM.yesButton.onclick = yesButtonHandler;
   DOM.noButton.onclick = noButtonHandler;
   DOM.okayButton.onclick = okayButtonHandler;
@@ -700,7 +702,7 @@ function updateInlineHintButton() {
   }
   const cost = GAME_CONFIG.hintPoints[GameState.hintCounter] ?? 80;
   btn.style.display = 'inline';
-  btn.textContent = `Hint ${GameState.hintCounter + 1} (-${cost} pts)`;
+  btn.innerHTML = `Hint ${GameState.hintCounter + 1} <span style="color: #ff4444; font-weight: bold;">(-${cost} pts)</span>`;
 }
 
 /**
@@ -977,6 +979,8 @@ function getStory(increaseScore = true, query = '') {
       appendStoryline('Oops! Please try again.' + currentQuery);
       if (query !== lastSubmittedQuery) {
         updateScore(-10);
+        /* Use the same stylesheet for points deduction */
+        /*
         Swal.fire({
           title: '-10 Points',
           text: 'Incorrect query. Each unique incorrect submission deducts 10 points.',
@@ -987,6 +991,21 @@ function getStory(increaseScore = true, query = '') {
           position: 'top',
           showConfirmButton: false,
           timer: 3000,
+        });
+        */
+        Swal.fire({
+          title: '',
+          imageUrl: ImagesLoader["trini"],
+          imageWidth: 50,
+          imageHeight: 50,
+          text: 'Incorrect query. -10 points deducted!',
+          icon: 'error',
+          background: '#000',
+          color: '#fff',
+          toast: true,
+          position: 'center',
+          showConfirmButton: false,
+          timer: 2000,
         });
       }
       lastSubmittedQuery = query;

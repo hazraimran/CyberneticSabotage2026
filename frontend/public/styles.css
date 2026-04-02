@@ -363,6 +363,17 @@ tr:first-child > th {
   font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
+
+  /* Make the close sign bigger for tutorial*/
+  color: #00ff00;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .close:hover,

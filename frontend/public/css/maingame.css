@@ -135,6 +135,9 @@ table{
   border: 1px solid var(--main-color);
   border-radius: 5px;
   padding: 10px;
+
+  /* Make Hint Button More Obvious */
+  box-shadow: 0 0 8px var(--main-color);
 }
 
 
@@ -171,6 +174,15 @@ table{
   align-items: center;
   justify-content: center;
   gap: 3px;
+
+  /* Make Hint Button More Obvious */
+  font-weight: bold;
+  text-shadow: 0 0 8px var(--main-color);
+  transition: transform 0.1s ease;
+}
+/* Make Hint Button More Obvious */
+#hint-button, #help-button, #sql-button:hover {
+  transform: scale(1.05);
 }
 
 .query-form-area{
