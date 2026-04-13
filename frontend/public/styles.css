@@ -108,7 +108,12 @@ body {
 
 .input-container {
   display: flex;
+  /* move cheatsheet near to submit */
+  /*
   align-items: stretch;
+  */
+  align-items: flex-start;
+  /* move cheatsheet near to submit */
   height: 100%;
 }
 
@@ -148,7 +153,10 @@ Text:active{
   margin: 20px;
   background-color: transparent;
   box-sizing: border-box;
-  
+  /* fix cheatsheet */
+  max-height: 120px;
+  resize: none;
+  /* fix cheatsheet */
 }
 
 .submit-button-interface {
@@ -159,8 +167,9 @@ Text:active{
   box-sizing: border-box;
   /* margin: auto; */
   margin-right: 10px;
-  height: 50px;
-  box-shadow: none
+  height: 40px;
+  box-shadow: none;
+  white-space: nowrap;
 }
 
 
@@ -172,7 +181,12 @@ Text:active{
   box-shadow: inset 0 0 20px 0 rgb(120, 119, 119);
   background-color: rgb(36, 36, 36);
   padding: 20px;
+  /* get rid of scroll bar */
+  /* 
   overflow: scroll;
+  */
+  overflow: hidden;
+  /* get rid of scroll bar */
   min-width: 250px;
   max-height: 100vw;
   
@@ -256,7 +270,12 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 0 10px;
+  /* change the gap */
+  /*
   margin-bottom: 1rem;
+  */
+  margin-bottom: 0.3rem;
+  /* change the gap */
   font-size: 1rem;
 }
 
@@ -456,4 +475,19 @@ form label{
 .swal2-image:hover{
   transition: all 0.3s ease;
   box-shadow: 0 0px 20px 0 var(--main-color);
+}
+
+#sql-modal {
+  background: transparent;
+  pointer-events: none;
+}
+
+#sql-modal .modal-content {
+  pointer-events: all;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
 }

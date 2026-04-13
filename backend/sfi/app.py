@@ -36,7 +36,7 @@ THEORETICAL_STRATEGIES = {
     "flow": None
 }
 
-def generate_triny_message(state, query_index, features):
+def generate_triny_message(state, query_index, features, username='Detective'):
     if state == "flow":
         return None
     
@@ -68,10 +68,10 @@ def generate_triny_message(state, query_index, features):
     
     evidence_str = ", ".join(evidence) if evidence else "behavaioral patterns"
     
-    prompt = f"""You are Triny, a tech-savvy and supportive AI Detective Assistant in the SQL educational game Cybernetic Sabotage. Your mission is to provide scaffolding that balances emotional support and logical guidance. You speak to the learner as a professional partner solving a high-stakes investigation.
+    prompt = f"""You are Triny, a tech-savvy and supportive AI Detective Assistant in the SQL educational game Cybernetic Sabotage. Your mission is to provide scaffolding that balances emotional support and logical guidance. You speak to the learner as a professional partner. IMPORTANT: Always address the learner by their name "{username}" instead of "Detective".
 
 Current situations:
- - Query: {query_context}
+ - Query: {query_context}appendStoryline('Oops! Please try again.');
  - Detected State: {state}
  - Behavioral Evidence: {evidence_str}
  - Strategy: {strategy}
@@ -81,12 +81,14 @@ Rules:
  2. Use detective-themed metaphors (evidence, tracking the lead, system logs)
  3. Maximum 2-3 sentences
  4. Be empathetic and encouraging
+ 5. Strict limit: 2 sentences maximum, under 40 words total
+ 6. NEVER use the word "Detective". Always address the learner as "{username}".
 
 Generate Triny's responses:"""
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=150,
+        max_tokens=80,
         temperature=0.7,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -97,9 +99,11 @@ Generate Triny's responses:"""
 def infer():
     data = request.get_json()
     session_id = data.get('session_id', 'default')
+    username = data.get('username', 'Detective')
     features = data.get('features', {})
     query_index = data.get('query_index', 0)
     baseline = data.get('baseline', None)
+    
     
     if not features:
         return jsonify({'error': 'No features provided'}), 400
@@ -117,7 +121,8 @@ def infer():
         triny_message = generate_triny_message(
             result['dominant_state'],
             query_index,
-            features
+            features,
+            username
         )
     result['triny_message'] = triny_message
     return jsonify(result)

@@ -58,23 +58,7 @@ for user in users:
                 })
         else:
             # No trigger events for this query
-            rows.append({
-                'username': username,
-                'query_index': query_index,
-                'time_used_ms': q.get('timeUsed'),
-                'hints_used': q.get('hintsUsed'),
-                'is_correct': q.get('isCorrect'),
-                'score': user.get('score'),
-                'query': q.get('query', '')[:50],
-                'detected_state': None,
-                'prob_flow': None,
-                'prob_frustration': None,
-                'prob_impulsivity': None,
-                'prob_uncertainty': None,
-                'prob_anxiety': None,
-                'triny_message': None,
-                'trigger_timestamp_ms': None,
-            })
+            rows.append({...})
 
 df = pd.DataFrame(rows)
 output_file = f'backend/scripts/study_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'

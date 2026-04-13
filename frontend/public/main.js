@@ -100,6 +100,22 @@ const GameState = {
   hintsUsed: 0
 };
 
+// Auto-complete suggestions
+const SQL_SUGGESTIONS = [
+  // Tables
+  'Employee', 'Robot', 'Log', 'Incident', 'AccessCode', 'Repair',
+  // Columns
+  'employeeID', 'firstName', 'lastName', 'jobTitle', 'department', 'lastLogin',
+  'robotID', 'Model', 'manufDate', 'status', 'lastUpdateOn', 'lastUpdatedByEmpID',
+  'logID', 'actionDesc', 'timeStamp', 'incidentID', 'desc', 'reportedBy',
+  'accessCode', 'accessLevel', 'lastAccess', 'repairID', 'repairStatus', 'repairedById',
+  // SQL Keywords
+  'SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT JOIN', 'INNER JOIN', 'GROUP BY',
+  'ORDER BY', 'HAVING', 'COUNT', 'DISTINCT', 'LIMIT', 'INSERT INTO',
+  'UPDATE', 'SET', 'CREATE TABLE', 'CREATE VIEW', 'MAX', 'MIN', 'AS',
+  'AND', 'OR', 'ON', 'DESC', 'ASC', 'VALUES', 'INTO', 'PRIMARY KEY'
+];
+
 // Rate limiting
 let lastScaffoldTime = 0;
 const SCAFFOLD_COOLDOWN = 60000;
@@ -113,6 +129,12 @@ let lastSubmittedQuery = '';
 
 // Triny messages overlapped with queries
 let currentQueryText = '';
+
+// Limit LLM message generation to 1 per query
+let lastScaffoldQueryIndex = -1;
+
+// track the attempts students made
+let attemptCount = 0;
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -364,6 +386,7 @@ async function initializeGame() {
   } catch (error) {
     console.error('Error initializing game:', error);
   }
+  initAutoComplete();
 }
 
 /**
@@ -703,6 +726,9 @@ function updateInlineHintButton() {
   const cost = GAME_CONFIG.hintPoints[GameState.hintCounter] ?? 80;
   btn.style.display = 'inline';
   btn.innerHTML = `Hint ${GameState.hintCounter + 1} <span style="color: #ff4444; font-weight: bold;">(-${cost} pts)</span>`;
+  btn.style.border = '';
+  btn.style.padding = '';
+  btn.style.borderRadius = '';
 }
 
 /**
@@ -865,6 +891,7 @@ function startGame() {
   const nextQuery = GameData.queries[nextQueryIndex];
   appendStoryline(nextQuery);
   if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+  attemptCount = 0;
   tabHiddenTime = 0;
   tabHiddenStart = null;
   GameState.progress = 10;
@@ -893,6 +920,7 @@ function restartGame() {
   GameState.correctQueriesSolved = 0;
   appendStoryline(GameData.queries[0]);
   if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+  attemptCount = 0;
   tabHiddenTime = 0;
   tabHiddenStart = null;
   GameState.currentQueryIndex = 0;
@@ -945,6 +973,7 @@ function getStory(increaseScore = true, query = '') {
       const nextQuery = GameData.queries[nextQueryIndex];
       appendStoryline(nextQuery);
       if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
+      attemptCount = 0;
       tabHiddenTime = 0;
       tabHiddenStart = null;
       DOM.hintCounter = 0;
@@ -1008,8 +1037,35 @@ function getStory(increaseScore = true, query = '') {
           showConfirmButton: false,
           timer: 2000,
         });
+        attemptCount++;
       }
       lastSubmittedQuery = query;
+
+      if (attemptCount >= 5) {
+        Swal.fire({
+          title: 'Need help?',
+          text: "You've tried 5 times. Would you like to see the correct answer?",
+          icon: 'question',
+          background: '#000',
+          color: '#fff',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'See answer & move on (-150 pts)',
+          denyButtonText: 'Just show answer (-50 pts)',
+          cancelButtonText: 'Keep trying',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            updateScore(-150);
+            appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
+            attemptCount = 0;
+            setTimeout(() => getStory(false), 3000);
+          } else if (result.isDenied) {
+            updateScore(-50);
+            appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
+            attemptCount = 0;
+          }
+        });
+      }
     }
   }
 }
@@ -1274,6 +1330,7 @@ async function pollSFI() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_id: localStorage.getItem('user') || 'anonymous',
+        username: localStorage.getItem('user') || 'Detective',
         features: features,
         query_index: GameState.currentQueryIndex,
         query_context: GameData.queries[GameState.currentQueryIndex],
@@ -1283,7 +1340,8 @@ async function pollSFI() {
     const result = await response.json();
     console.log('SFI result:', result);
 
-    if (result.trigger_scaffold && result.triny_message) {
+    if (result.trigger_scaffold && result.triny_message && GameState.currentQueryIndex !== lastScaffoldQueryIndex) {
+      lastScaffoldQueryIndex = GameState.currentQueryIndex;
       triggerTrinyScaffold(result.triny_message, result);
     }
   } catch (error) {
@@ -1332,6 +1390,102 @@ function triggerTrinyScaffold(message, result) {
   }).catch(err => console.error('Failed to log trigger:', err));
 }
 
+function linkSQLKeywords(text) {
+  const keywords = Object.keys(SQL_COMMANDS_HTML).sort((a, b) => b.length - a.length);
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+    text = text.replace(regex, `<span style="text-decoration: underline; cursor: pointer; color: #00ff00; font-weight: bold;" onclick="openCheatsheetFor('${keyword}')">${keyword}</span>`);
+  });
+  return text;
+}
+
+function openCheatsheetFor(keyword) {
+  LoadSqlCommands();
+  setTimeout(() => {
+    const explanation = document.getElementById('sql-commands-explanation');
+    if (SQL_COMMANDS_HTML[keyword.toUpperCase()]) {
+      explanation.innerHTML = SQL_COMMANDS_HTML[keyword.toUpperCase()];
+    }
+  }, 100);
+}
+
+function initAutoComplete() {
+  const textarea = document.getElementById('query-textarea');
+  
+  // Create dropdown
+  const dropdown = document.createElement('div');
+  dropdown.id = 'autocomplete-dropdown';
+  dropdown.style.cssText = `
+    position: absolute;
+    background: #000;
+    border: 1px solid #00ff00;
+    border-radius: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+  `;
+  textarea.parentElement.style.position = 'relative';
+  textarea.parentElement.appendChild(dropdown);
+
+  textarea.addEventListener('input', () => {
+    const value = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastWord = textBeforeCursor.split(/[\s,.()\n]/).pop();
+
+    if (lastWord.length < 2) {
+      dropdown.style.display = 'none';
+      return;
+    }
+
+    const matches = SQL_SUGGESTIONS.filter(s => 
+      s.toLowerCase().startsWith(lastWord.toLowerCase()) && 
+      s.toLowerCase() !== lastWord.toLowerCase()
+    );
+
+    if (matches.length === 0) {
+      dropdown.style.display = 'none';
+      return;
+    }
+
+    dropdown.innerHTML = matches.slice(0, 8).map(m => 
+      `<div style="padding: 6px 10px; cursor: pointer; color: #00ff00; font-family: monospace;"
+        onmouseover="this.style.background='#1a1a1a'"
+        onmouseout="this.style.background=''"
+        onclick="insertSuggestion('${m}')">${m}</div>`
+    ).join('');
+    
+    dropdown.style.display = 'block';
+  });
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target !== textarea) dropdown.style.display = 'none';
+  });
+}
+
+function insertSuggestion(suggestion) {
+  const textarea = document.getElementById('query-textarea');
+  const cursorPos = textarea.selectionStart;
+  const value = textarea.value;
+  const textBeforeCursor = value.substring(0, cursorPos);
+  const lastWordStart = textBeforeCursor.search(/[\w]+$/);
+  
+  textarea.value = value.substring(0, lastWordStart) + suggestion + value.substring(cursorPos);
+  textarea.focus();
+  textarea.selectionStart = lastWordStart + suggestion.length;
+  textarea.selectionEnd = lastWordStart + suggestion.length;
+  
+  document.getElementById('autocomplete-dropdown').style.display = 'none';
+}
+
 function appendStoryline(text) {
   text = text.replace(/'/g, '&#39;');
   
@@ -1339,9 +1493,11 @@ function appendStoryline(text) {
   
   if (isQueryText) {
     currentQueryText = text;
-    DOM.storyline.innerHTML = text + ' <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+    DOM.storyline.innerHTML = currentQueryText + '<br><span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #ff4444; text-decoration: underline; cursor: pointer; font-size: 1em; font-weight: bold;"></span>';
+  } else if (text.startsWith('Oops')) {
+    DOM.storyline.innerHTML = currentQueryText + '<br><span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #ff4444; text-decoration: underline; cursor: pointer; font-size: 1em; font-weight: bold;"></span>';
   } else {
-    DOM.storyline.innerHTML = text + '<hr style="border-color: #00ff00; margin: 8px 0;"><small style="opacity: 0.8;">' + currentQueryText + '</small> <span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #00ff00; text-decoration: underline; cursor: pointer; font-size: 0.85em;"></span>';
+    DOM.storyline.innerHTML = currentQueryText + '<br><span id="inline-hint-button" onclick="yesButtonHandler()" style="color: #ff4444; text-decoration: underline; cursor: pointer; font-size: 1em; font-weight: bold;"></span><hr style="border-color: #00ff00; margin: 8px 0;"><small style="opacity: 0.8;">' + text + '</small>';
   }
   updateInlineHintButton();
 }
