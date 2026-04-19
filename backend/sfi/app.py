@@ -94,7 +94,7 @@ Generate Triny's responses:"""
     )
     
     return message.content[0].text
-
+ 
 @app.route('/sfi/infer', methods=['POST'])
 def infer():
     data = request.get_json()

@@ -177,23 +177,71 @@ const GameData = {
   'CREATE VIEW RobotIncidentView AS SELECT r.robotID, r.Model, r.lastUpdatedByEmpID, i.incidentID, i.desc, i.timeStamp, e.firstName, e.lastName FROM Robot r JOIN Incident i ON r.robotID = i.robotID JOIN Employee e ON r.lastUpdatedByEmpID = e.employeeID; SELECT * FROM RobotIncidentView;',
   'SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );',
   'CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );',
-  'INSERT INTO Repair ("repairID", "repairStatus", "desc", "robotID", "repairedById" ) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its defaulty patterns\', 5 , 7); SELECT * FROM Repair;', 
+  'INSERT INTO Repair (repairID, repairStatus, desc, robotID, repairedById) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its faulty patterns\', 5, 7); SELECT * FROM Repair;',
   'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\';'
   ],
   hints: [
-  ['start with the basics. Use the <strong>SELECT</strong> statement to pull data from the <strong>Incident</strong> table.', 'hink like a pro. Structure your query as: SELECT _ FROM [TableName]. You’re almost there!'],
-  ['time is key! To find the most recent incident, focus on the <strong>timeStamp</strong>. Try using the <strong>LIMIT</strong> keyword.', 'Sort the <strong>timeStamp</strong> in descending order (<strong>DESC</strong>) to bring the latest case to the top.'],
-  ['first, connect the <strong>Robot</strong> and <strong>Incident</strong> tables using a <strong>LEFT JOIN</strong> to ensure all robot models are included.', 'Now, use <strong>GROUP BY Model</strong> to group the robots and count incidents for each one.'],
-  ['focus on the <strong>lastUpdateOn</strong> column to track recent updates. Use a condition to filter for the past 7 days.', 'o ensure accuracy, use <strong>DISTINCT</strong> to count unique <strong>robotIDs</strong> updated within the given date range.'],
-  ['start by using a subquery to find employee IDs of those who updated robots in the past 7 days.', 'Next, filter the employee records using <strong>IN</strong> to get their full names and unique IDs.'],
-  ['start by updating the robots! Use <strong>UPDATE</strong> to set the <strong>status</strong> to <strong>Under Repair</strong> for those updated in the past 7 days.', 'After marking them, retrieve and display all robot details…Just like in your first mission.'],
-  ['track down the employee with the most robot updates! Use <strong>COUNT(*)</strong> and <strong>GROUP BY lastUpdatedByEmpID</strong> to count updates per employee.', 'Now, sort the results in descending order with <strong>ORDER BY COUNT(*) DESC</strong> to find the top whistleblower.', 'Use <strong>LIMIT 1</strong> to return only the employee with the highest number of updates.'],
-  ['start by linking the <strong>Robot</strong> and <strong>Incident</strong> tables using <strong>JOIN</strong> on their common column to connect incidents with robots.', 'Next, join the <strong>Employee</strong> table to retrieve the first and last names of the employee who last updated each robot. Then, display the view.'],
-  ['to track down malfunctioning models, use a subquery to count how many incidents each robot has been involved in.','Now, filter models with more than 2 incidents using the <strong>HAVING</strong> clause to identify the most problematic robots.'],
-  ['start by using <strong>CREATE TABLE</strong> to set up the <strong>Repair</strong> table with the required columns.', 'Ensure each column has the correct data type as specified in the mission.', 'If the table already exists, use <strong>DROP TABLE Repair;</strong> before creating it again.'],
-  ['use <strong>INSERT INTO</strong> to add a new repair record. Ensure all required columns are correctly filled.', "Use <strong>VALUES</strong> to insert the following data: <strong>(1, 'Under Repair', 'This robot model is undergoing repair due to its faulty patterns', 5, 7)</strong>."],
-  ['start by using <strong>JOIN</strong> to link the <strong>Employee</strong> and <strong>Log</strong> tables based on the appropriate columns.', 'To track the last employee who updated faulty robots, use a subquery with <strong>MAX(timeStamp)</strong> to find the most recent update for each robot.', 'Finally, <strong>JOIN</strong> this result with the <strong>Employee</strong> and <strong>Robot</strong> tables to get the details of the last updating employee.']
+  [
+    'All reported incidents means you need every row from the <strong>Incident</strong> table.',
+    'To return all columns from one table, use the pattern: <strong>SELECT * FROM table_name</strong>. Replace <strong>table_name</strong> with <strong>Incident</strong>.',
+    '<strong>SELECT * FROM Incident;</strong> This works because <strong>*</strong> selects all columns and <strong>FROM Incident</strong> specifies the table.'
   ],
+  [
+    'The most recent incident means the row with the latest <strong>timeStamp</strong> value.',
+    'To get the latest record, sort the table by <strong>timeStamp</strong> in descending order: <strong>ORDER BY timeStamp DESC</strong>',
+    '<strong>SELECT * FROM Incident ORDER BY timeStamp DESC LIMIT 1;</strong> This works because <strong>ORDER BY timeStamp DESC</strong> puts the latest record first, and <strong>LIMIT 1</strong> returns only that row.'
+  ],
+  [
+    'You need to count how many incidents are linked to each robot model, while still including models with no incidents.',
+    'Join the <strong>Robot</strong> and <strong>Incident</strong> tables using a <strong>LEFT JOIN</strong>, then group by model: <strong>FROM Robot r LEFT JOIN Incident i ON r.robotID = i.robotID GROUP BY r.Model</strong>',
+    '<strong>SELECT r.Model, COUNT(i.incidentID) AS IncidentCount FROM Robot AS r LEFT JOIN Incident AS i ON r.robotID = i.robotID GROUP BY r.Model;</strong> This works because <strong>LEFT JOIN</strong> keeps all robot models, <strong>COUNT()</strong> counts incidents per model, and <strong>GROUP BY</strong> groups results by model.'
+  ],
+  [
+    'You need to count how many unique robots were updated in the past week, based on the <strong>lastUpdateOn</strong> date.',
+    'Filter rows within the date range using <strong>WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\'</strong>. Use <strong>COUNT(DISTINCT robotID)</strong> to count unique robots.',
+    '<strong>SELECT COUNT(DISTINCT robotID) AS NumberOfUpdatedRobots FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\';</strong> This works because the <strong>WHERE</strong> clause filters updates within the past week, and <strong>COUNT(DISTINCT robotID)</strong> ensures each robot is counted only once.'
+  ],
+  [
+    'You need to find employees who updated robots in the past week. First identify which employee IDs appear in recent robot updates, then retrieve their details.',
+    'Use a subquery to get employee IDs from <strong>Robot</strong>, then filter <strong>Employee</strong> using <strong>IN</strong>: <strong>WHERE employeeID IN (SELECT lastUpdatedByEmpID FROM Robot WHERE ...)</strong>',
+    '<strong>SELECT DISTINCT e.employeeID, e.firstName, e.lastName FROM Employee e WHERE e.employeeID IN ( SELECT DISTINCT lastUpdatedByEmpID FROM Robot WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\' );</strong> This works because the subquery finds employees who updated robots recently, and <strong>IN</strong> filters the Employee table to return their details.'
+  ],
+  [
+    'You need to first update the <strong>status</strong> of robots serviced in the past week, then retrieve all robot records to see the updated results.',
+    'Use an <strong>UPDATE</strong> statement with a <strong>WHERE</strong> clause to modify recent robots, then run a <strong>SELECT</strong> query: <strong>UPDATE Robot SET status = \'Under Repair\' WHERE ...;</strong> followed by <strong>SELECT * FROM Robot;</strong>',
+    '<strong>UPDATE Robot SET status = \'Under Repair\' WHERE lastUpdateOn >= \'2023-07-17\' AND lastUpdateOn < \'2023-07-24\'; SELECT * FROM Robot;</strong> This works because the <strong>UPDATE</strong> statement modifies the status of recent robots, and the <strong>SELECT</strong> query retrieves all robot details after the update.'
+  ],
+  [
+    'You need to count how many updates each employee made, then find the employee with the highest count.',
+    'Group updates by employee and count them, then sort in descending order: <strong>GROUP BY lastUpdatedByEmpID ORDER BY COUNT(*) DESC</strong>',
+    '<strong>SELECT lastUpdatedByEmpID AS employeeID, COUNT(*) AS NumberOfIncidents FROM Robot GROUP BY lastUpdatedByEmpID ORDER BY COUNT(*) DESC LIMIT 1;</strong> This works because <strong>GROUP BY</strong> counts updates per employee, <strong>ORDER BY ... DESC</strong> puts the highest count first, and <strong>LIMIT 1</strong> returns the top employee.',
+  ],
+  [
+    'You need to combine data from <strong>Robot</strong>, <strong>Incident</strong>, and <strong>Employee</strong> into a single result, save it as a view, and then display it.',
+    'First join <strong>Robot</strong> with <strong>Incident</strong>, then join <strong>Employee</strong> to get the updater\'s name. Wrap the query using <strong>CREATE VIEW RobotIncidentView AS ...</strong>, then run <strong>SELECT * FROM RobotIncidentView;</strong>',
+    '<strong>CREATE VIEW RobotIncidentView AS SELECT r.robotID, r.Model, r.lastUpdatedByEmpID, i.incidentID, i.desc, i.timeStamp, e.firstName, e.lastName FROM Robot r JOIN Incident i ON r.robotID = i.robotID JOIN Employee e ON r.lastUpdatedByEmpID = e.employeeID; SELECT * FROM RobotIncidentView;</strong> This works because the joins connect robots to their incidents and the employee who last updated them, and the view stores the combined query for reuse.'
+  ],
+  [
+    'You need to find robot IDs that appear in more than 2 incidents, then return the models of those robots.',
+    'Use a subquery to count incidents per robot using <strong>GROUP BY</strong> and filter using <strong>HAVING COUNT(*) > 2</strong>, then use <strong>IN</strong> to match those robot IDs in the <strong>Robot</strong> table.',
+    '<strong>SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );</strong> This works because the subquery identifies robots with more than 2 incidents, and the outer query returns their corresponding models.'
+  ],
+  [
+    'You need to create a new table called <strong>Repair</strong> with the specified columns and data types to store repair information.',
+    'Use <strong>CREATE TABLE</strong> followed by the table name and define each column with its data type inside parentheses: <strong>CREATE TABLE Repair (columnName dataType, ...)</strong>',
+    '<strong>CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );</strong> This works because <strong>CREATE TABLE</strong> defines a new table structure, and each column is assigned the correct data type for storing repair data.'
+  ],
+  [
+    'You need to insert a new row into the <strong>Repair</strong> table with the given values, then retrieve the table to confirm the insertion.',
+    'Use <strong>INSERT INTO</strong> with the column names, followed by <strong>VALUES</strong> to add the new record: <strong>INSERT INTO Repair (columns...) VALUES (...);</strong> Then run <strong>SELECT * FROM Repair;</strong>',
+    '<strong>INSERT INTO Repair (repairID, repairStatus, desc, robotID, repairedById) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its faulty patterns\', 5, 7); SELECT * FROM Repair;</strong> This works because <strong>INSERT INTO</strong> adds a new record to the table, and <strong>SELECT *</strong> displays the updated contents.'
+  ],
+  [
+    'You need to find the most recent update made to any robot currently under repair, then return the employee who performed that update.',
+    'Use a subquery on <strong>Log</strong> to find the latest update per robot using <strong>MAX(timeStamp)</strong>, then join with <strong>Employee</strong> and <strong>Robot</strong>, and sort to get the most recent: <strong>ORDER BY lastUpdate DESC LIMIT 1</strong>',
+    '<strong>SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM Log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\' ORDER BY l.lastUpdate DESC LIMIT 1;</strong> This works because the subquery finds the latest update for each robot, and the joins connect that to employee and robot details, while sorting and limiting returns the single most recent update overall.'
+  ]
+],
   answerKeys: [
   [
     [1, 'Robot malfunctioned during production', '2022-02-20 09:30:00', 'Jane Smith', 2],
@@ -258,10 +306,10 @@ const GameData = {
     ['repairID'], ['repairStatus'], ['desc'], ['robotID'], ['repairedById']
   ],
   [
-    [1, 'Under Repair', 'This robot model is undergoing repair due to its defaulty patterns', 5, 7]
+    [1, 'Under Repair', 'This robot model is undergoing repair due to its faulty patterns', 5, 7]
   ],
   [
-    [7, 'Laksh', 'Agarwal', '2023-07-21 15:30:00', 7]
+    [1, 'Thomas', 'Anderson', '2022-06-12 10:25:00', 4]
   ]
 ]
 };
