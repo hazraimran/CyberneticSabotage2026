@@ -777,13 +777,22 @@ function updateInlineHintButton() {
   const btn = document.getElementById('inline-hint-button');
   const hintArray = GameData.hints[GameState.currentQueryIndex];
 
+  // Show used hints
+  let usedHintsHTML = '';
+  if (GameState.hintCounter > 0) {
+    usedHintsHTML = Array.from({length: GameState.hintCounter}, (_, i) =>
+      `<span style="color: #888; font-size: 0.85em; margin-right: 6px;">Hint ${i + 1} used (-${GAME_CONFIG.hintPoints[i] ?? ''} pts)</span>`
+    ).join('');
+  }
+
+  // Show next available hint button
   if (GameState.hintCounter >= hintArray.length) {
-    btn.textContent = '';
+    btn.innerHTML = usedHintsHTML;
     return;
   }
   const cost = GAME_CONFIG.hintPoints[GameState.hintCounter] ?? 80;
   btn.style.display = 'inline';
-  btn.innerHTML = `Hint ${GameState.hintCounter + 1} <span style="color: #ff4444; font-weight: bold;">(-${cost} pts)</span>`;
+  btn.innerHTML = `${usedHintsHTML}<span style="color: #ff4444; font-weight: bold; text-decoration: underline; cursor: pointer;">Hint ${GameState.hintCounter + 1} (-${cost} pts)</span>`;
   btn.style.border = '';
   btn.style.padding = '';
   btn.style.borderRadius = '';
@@ -837,20 +846,6 @@ function yesButtonHandler() {
           confirmButtonText: "Got It",
         })
       }
-    })
-  } else if (GameState.hintCounter === hintArray.length) {
-    updateHintCounter(1);
-    Swal.fire({
-      title: 'White Rabit Wants To Help',
-      text: 'I have infiltrated the database and found the answer to your question. Im sending it to you now.',
-      ...GAME_CONFIG.whiteRabbitConfig,
-      timer: 10000,
-      timerProgressBar: true,
-      showCancelButton: false,
-      confirmButtonText: "Got It",
-  toast: true,
-    }).then(() => {
-      DOM.textarea.value = GameData.queryAnswers[GameState.currentQueryIndex];
     })
   }
 }
