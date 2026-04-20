@@ -19,9 +19,9 @@ Object.keys(ImagesLoader).forEach(key => {
  * @constant {Object}
  */
 const GAME_CONFIG = {
-  initialScore: 150,
+  initialScore: 100,
   initialProgress: 10,
-  hintPoints: [40, 60, 80],
+  hintPoints: [10, 20, 40],
   whiteRabbitConfig: {
     imageUrl: ImagesLoader["white-rabbit"],
     imageWidth: 200,
@@ -135,6 +135,7 @@ let lastScaffoldQueryIndex = -1;
 
 // track the attempts students made
 let attemptCount = 0;
+let queryHelpLevel = 0; // 0=none, 1=hint1, 2=hint2/sampleOutput, 3=hint3, 4=finalSQL
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -751,7 +752,10 @@ function updateProgressBar(change) {
 function getHint() {
   const hintIndex = GameState.currentQueryIndex;
   const hintArray = GameData.hints[hintIndex];
-  GameState.hintsUsed++;
+  GameState.hintsUsed++; 
+  if (GameState.hintCounter === 0) queryHelpLevel = Math.max(queryHelpLevel, 1);
+  else if (GameState.hintCounter === 1) queryHelpLevel = Math.max(queryHelpLevel, 2);
+  else if (GameState.hintCounter === 2) queryHelpLevel = Math.max(queryHelpLevel, 3);
 
   if (GameState.hintCounter < hintArray.length) {
     updateScore(-GAME_CONFIG.hintPoints[GameState.hintCounter]);
@@ -918,12 +922,8 @@ function startGame() {
   let agentName = getAgentName();
   DOM.agentNameDisplay.textContent = agentName;
 
-  if (score > 150) {
-    score = parseInt(score, 10);
-  } else {
-    score = 150;
-      score = parseInt(score, 10); // Convert score back to a number if it's stored as a string
-  }
+  score = score ? parseInt(score, 10) : 100;
+  if (score > 100) score = 100;
 
   GameState.correctQueriesSolved = parseInt(localStorage.getItem('totalQueriesSolved') ?? 0, 10);
   GameState.score = score;
@@ -942,6 +942,7 @@ function startGame() {
   attemptCount = 0;
   tabHiddenTime = 0;
   tabHiddenStart = null;
+  queryHelpLevel = 0; 
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
   // pollSFI
@@ -971,10 +972,11 @@ function restartGame() {
   attemptCount = 0;
   tabHiddenTime = 0;
   tabHiddenStart = null;
+  queryHelpLevel = 0; 
   GameState.currentQueryIndex = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
 
-  setGameConfiguration(0, 150);
+  setGameConfiguration(0, 100);
   updateTimer();
   updateScore(0);
   updateProgressBar(0);
@@ -1144,13 +1146,19 @@ function getStory(increaseScore = true, query = '') {
       GameState.currentQueryIndex = nextQueryIndex;
       if (increaseScore) {
         GameState.correctQueriesSolved++;
-        updateScore(100);
+        const rewardMap = [80, 70, 60, 50, 30];
+        const reward = rewardMap[queryHelpLevel] ?? 80;
+        queryHelpLevel = 0;
+        tabHiddenTime = 0;
+        tabHiddenStart = null;
+        attemptCount = 0;
+        updateScore(reward);
         Swal.fire({
           title: '',
           imageUrl: ImagesLoader["trini"],
           imageWidth: 50,
           imageHeight: 50,
-          text: 'You have earned 100 points!',
+          text: `You have earned ${reward} points!`,
           icon: 'success',
           background: '#000',
           color: '#fff',
@@ -1208,29 +1216,31 @@ function getStory(increaseScore = true, query = '') {
 
       if (attemptCount >= 5) {
         Swal.fire({
-          title: 'Need help?',
-          text: "You've tried 5 times. Would you like to see the correct answer?",
-          icon: 'question',
-          background: '#000',
-          color: '#fff',
-          showDenyButton: true,
-          showCancelButton: true,
-          confirmButtonText: 'See answer & move on (-150 pts)',
-          denyButtonText: 'Just show answer (-50 pts)',
-          cancelButtonText: 'Keep trying',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            updateScore(-150);
-            appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
-            attemptCount = 0;
-            setTimeout(() => getStory(false), 3000);
-          } else if (result.isDenied) {
-            updateScore(-50);
-            appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
-            attemptCount = 0;
-          }
-        });
-      }
+        title: 'Need help?',
+        text: "You've tried 5 times. Would you like some help?",
+        icon: 'question',
+        background: '#000',
+        color: '#fff',
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Show Final SQL & move on (-70 pts)',
+        denyButtonText: 'Show Sample Output (-30 pts)',
+        cancelButtonText: 'Keep trying',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          updateScore(-70);
+          queryHelpLevel = 4;
+          appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
+          attemptCount = 0;
+          setTimeout(() => getStory(false), 3000);
+        } else if (result.isDenied) {
+          updateScore(-30);
+          queryHelpLevel = Math.max(queryHelpLevel, 2);
+          appendStoryline('Sample output has been deducted from your score.');
+          attemptCount = 0;
+        }
+      });
+    }
   }
 }
 
@@ -1252,7 +1262,7 @@ function timeElapsed() {
  * @param {number} change - The amount to change the score by
  */
 function updateScore(change) {
-  GameState.score += change;
+  GameState.score = Math.max(0, GameState.score + change);
   DOM.scoreText.textContent = 'Score: ' + GameState.score;
   DOM.correctQueries.textContent = 'Q: ' + (GameState.correctQueriesSolved + 1) + ' / 12';
   if (change > 0 && GameState.soundEnabled) {
