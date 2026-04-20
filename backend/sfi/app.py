@@ -93,7 +93,9 @@ Generate Triny's responses:"""
         messages=[{"role": "user", "content": prompt}]
     )
     
-    return message.content[0].text
+    response = message.content[0].text
+    response = response.replace('Detective', username).replace('detective', username)
+    return response
  
 @app.route('/sfi/infer', methods=['POST'])
 def infer():
