@@ -1455,6 +1455,10 @@ function executeQuery(query ) {
       if (GameState.currentQueryIndex === 9) {
         const results2 = GameState.db.exec('SELECT name FROM pragma_table_info(\'Repair\') ORDER BY cid;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
+        if (!GameState.flag && query.toUpperCase().includes('CREATE TABLE')) {
+          GameState.db.exec('DROP TABLE IF EXISTS Repair;');
+          displayMessage('ERROR: Wrong table structure. The table has been removed. Check column names and data types.', true);
+        }
       } else if (GameState.currentQueryIndex === 10) {
         const results2 = GameState.db.exec('SELECT * FROM Repair;');
         GameState.flag = validateResult(results2[0].values, GameState.currentQueryIndex);
