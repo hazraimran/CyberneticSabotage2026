@@ -999,6 +999,122 @@ function provideFeedback() {
   window.open(FEEDBACK_FORM_URL, '_blank');
 }
 
+function getAdaptiveFeedback(query, queryIndex) {
+  const q = query.toUpperCase().trim();
+
+  const rules = [
+    // Q1
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with the basic query pattern: <strong>SELECT ... FROM ....</strong>' },
+      { check: () => q.startsWith('SELECT') && !q.includes('FROM'), msg: 'You\'ve started correctly. Now specify what to return after SELECT, such as <strong>*</strong> for all columns.' },
+      { check: () => q.includes('FROM') && !q.includes('INCIDENT'), msg: 'Check the table name. For this task, use <strong>Incident</strong>.' },
+      { check: () => !q.startsWith('SELECT'), msg: 'SQL queries must follow the structure <strong>SELECT ... FROM ....</strong>' },
+    ],
+    // Q2
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with the basic query pattern: <strong>SELECT ... FROM Incident</strong>, then think about ordering by time.' },
+      { check: () => q.includes('SELECT') && q.includes('FROM') && !q.includes('ORDER'), msg: 'You are retrieving all incidents, but not selecting the latest one. Think about ordering by time.' },
+      { check: () => q.includes('ORDER') && !q.includes('DESC'), msg: 'Ascending order shows the oldest first. Use <strong>DESC</strong> to get the most recent record.' },
+      { check: () => q.includes('ORDER') && q.includes('DESC') && !q.includes('LIMIT'), msg: 'You sorted correctly. Now return only one row using <strong>LIMIT 1</strong>.' },
+    ],
+    // Q3
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start by selecting from the <strong>Robot</strong> table, then think about joining it with <strong>Incident</strong>.' },
+      { check: () => !q.includes('JOIN'), msg: 'You need to combine <strong>Robot</strong> and <strong>Incident</strong> to count incidents per model.' },
+      { check: () => q.includes('INNER JOIN') && !q.includes('LEFT'), msg: '<strong>INNER JOIN</strong> excludes robots with no incidents. Use <strong>LEFT JOIN</strong> to include all models.' },
+      { check: () => q.includes('JOIN') && !q.includes('GROUP'), msg: 'You need to group by <strong>Model</strong> to get counts per robot.' },
+      { check: () => q.includes('GROUP') && !q.includes('COUNT'), msg: 'Use <strong>COUNT()</strong> to calculate the number of incidents for each model.' },
+      { check: () => q.includes('JOIN') && !q.includes('R.ROBOTID') && !q.includes('ROBOTID'), msg: 'Check the join condition. Match <strong>r.robotID</strong> with <strong>i.robotID</strong>.' },
+    ],
+    // Q4
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with <strong>SELECT COUNT(...) FROM Robot</strong>, then think about filtering by date.' },
+      { check: () => q.includes('COUNT') && !q.includes('WHERE'), msg: 'You need to filter robots updated in the past week using <strong>lastUpdateOn</strong>.' },
+      { check: () => q.includes('WHERE') && (!q.includes('2023-07-17') || !q.includes('2023-07-24')), msg: 'Use dates from <strong>2023-07-17</strong> to <strong>2023-07-24</strong> to represent the past 7 days.' },
+      { check: () => q.includes('COUNT(*)') && !q.includes('DISTINCT'), msg: 'A robot may appear multiple times. Use <strong>DISTINCT</strong> to count each robot once.' },
+      { check: () => !q.includes('LASTUPDATEON'), msg: 'Use the <strong>lastUpdateOn</strong> column to filter recent updates.' },
+    ],
+    // Q5
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start from the <strong>Employee</strong> table, then think about how to filter employees based on robot updates.' },
+      { check: () => !q.includes('IN') && !q.includes('JOIN'), msg: 'You need a way to identify which employees updated robots. Consider using a subquery with <strong>IN</strong>.' },
+      { check: () => q.includes('IN') && !q.includes('LASTUPDATEDBYEMPID'), msg: 'Use <strong>lastUpdatedByEmpID</strong> to identify which employee made the update.' },
+      { check: () => q.includes('WHERE') && (!q.includes('2023-07-17') || !q.includes('2023-07-24')), msg: 'Filter robot updates between <strong>2023-07-17</strong> and <strong>2023-07-24</strong>.' },
+      { check: () => !q.includes('DISTINCT'), msg: 'An employee may appear multiple times. Use <strong>DISTINCT</strong> to return unique employees.' },
+    ],
+    // Q6
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with an <strong>UPDATE</strong> statement to modify robot status, then retrieve results using <strong>SELECT</strong>.' },
+      { check: () => !q.includes('UPDATE'), msg: 'You need to update the status of robots before retrieving them.' },
+      { check: () => q.includes('UPDATE') && !q.includes('WHERE'), msg: 'Be careful. Without <strong>WHERE</strong>, all robots will be updated. Filter by <strong>lastUpdateOn</strong>.' },
+      { check: () => q.includes('WHERE') && (!q.includes('2023-07-17') || !q.includes('2023-07-24')), msg: 'Use dates from <strong>2023-07-17</strong> to <strong>2023-07-24</strong> to represent the past 7 days.' },
+      { check: () => q.includes('UPDATE') && !q.includes("'UNDER REPAIR'") && !q.includes('"UNDER REPAIR"'), msg: 'Set <strong>status = \'Under Repair\'</strong> to mark the robots correctly.' },
+      { check: () => q.includes('UPDATE') && !q.includes('SELECT'), msg: 'You updated the data, but also need to retrieve it. Add <strong>SELECT * FROM Robot;</strong> after the update.' },
+    ],
+    // Q7
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start by grouping robot updates by employee, then count how many updates each made.' },
+      { check: () => !q.includes('GROUP'), msg: 'You need to group updates by <strong>lastUpdatedByEmpID</strong> to count per employee.' },
+      { check: () => q.includes('GROUP') && !q.includes('COUNT'), msg: 'Use <strong>COUNT(*)</strong> to calculate how many updates each employee made.' },
+      { check: () => q.includes('COUNT') && !q.includes('ORDER'), msg: 'You have counts, but need to sort them to find the highest one.' },
+      { check: () => q.includes('ORDER') && !q.includes('DESC'), msg: 'Ascending order shows the smallest counts first. Use <strong>DESC</strong> for highest.' },
+      { check: () => q.includes('ORDER') && q.includes('DESC') && !q.includes('LIMIT'), msg: 'You sorted correctly. Now return only one row using <strong>LIMIT 1</strong>.' },
+    ],
+    // Q8
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start by joining <strong>Robot</strong>, <strong>Incident</strong>, and <strong>Employee</strong>, then place the query inside a <strong>CREATE VIEW</strong> statement.' },
+      { check: () => !q.includes('CREATE VIEW'), msg: 'You need to create a view named <strong>RobotIncidentView</strong> using <strong>CREATE VIEW</strong>.' },
+      { check: () => q.includes('CREATE VIEW') && !q.includes('INCIDENT'), msg: 'This query requires all three tables: <strong>Robot</strong>, <strong>Incident</strong>, and <strong>Employee</strong>.' },
+      { check: () => q.includes('JOIN') && !q.includes('R.ROBOTID') && !q.includes('I.ROBOTID'), msg: 'Join using <strong>r.robotID = i.robotID</strong>.' },
+      { check: () => q.includes('JOIN') && !q.includes('LASTUPDATEDBYEMPID') && !q.includes('E.EMPLOYEEID'), msg: 'Join using <strong>r.lastUpdatedByEmpID = e.employeeID</strong>.' },
+      { check: () => q.includes('CREATE VIEW') && !q.includes('SELECT * FROM ROBOTINCIDENTVIEW'), msg: 'Run <strong>SELECT * FROM RobotIncidentView;</strong> to display the results.' },
+    ],
+    // Q9
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start by identifying robots with more than 2 incidents, then retrieve their models.' },
+      { check: () => !q.includes('IN') && !q.includes('JOIN'), msg: 'You need a subquery to count incidents per robot.' },
+      { check: () => q.includes('FROM INCIDENT') && !q.includes('GROUP'), msg: 'Group incidents by <strong>robotID</strong> to count how many each robot has.' },
+      { check: () => q.includes('GROUP') && !q.includes('HAVING'), msg: 'Use <strong>HAVING COUNT(*) > 2</strong> to filter robots with more than 2 incidents.' },
+      { check: () => q.includes('WHERE') && !q.includes('HAVING') && q.includes('COUNT'), msg: '<strong>WHERE</strong> cannot filter aggregated results. Use <strong>HAVING</strong> with <strong>COUNT()</strong>.' },
+    ],
+    // Q10
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with <strong>CREATE TABLE Repair</strong>, then define each column with its data type.' },
+      { check: () => !q.includes('CREATE TABLE'), msg: 'Use <strong>CREATE TABLE Repair (...)</strong> to define the table.' },
+      { check: () => q.includes('CREATE TABLE') && (!q.includes('(') || !q.includes(')')), msg: 'Column definitions must be enclosed in parentheses after the table name.' },
+      { check: () => q.includes('CREATE TABLE') && (!q.includes('REPAIRID') || !q.includes('REPAIRSTATUS') || !q.includes('ROBOTID') || !q.includes('REPAIREDBYID')), msg: 'Include all required columns: <strong>repairID, repairStatus, desc, robotID, repairedById</strong>.' },
+      { check: () => q.includes('ALREADY EXISTS') || (q.includes('CREATE TABLE') && q.includes('REPAIR') && q.includes('ERROR')), msg: 'If the table exists, run <strong>DROP TABLE Repair;</strong> before creating it again.' },
+    ],
+    // Q11
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start with <strong>INSERT INTO Repair</strong>, then specify columns and values.' },
+      { check: () => !q.includes('INSERT'), msg: 'Use <strong>INSERT INTO Repair (...) VALUES (...)</strong> to add a new record.' },
+      { check: () => q.includes('INSERT') && !q.includes('REPAIRID'), msg: 'Specify the columns: <strong>repairID, repairStatus, desc, robotID, repairedById</strong>.' },
+      { check: () => q.includes('INSERT') && !q.includes('VALUES'), msg: 'Use <strong>VALUES</strong> to insert the provided data.' },
+      { check: () => q.includes('INSERT') && !q.includes('SELECT'), msg: 'You need to also retrieve the table after inserting. Add <strong>SELECT * FROM Repair;</strong>' },
+    ],
+    // Q12
+    [
+      { check: () => q === '' || q.length < 3, msg: 'Start by finding the latest update per robot, then connect it to employee and robot details.' },
+      { check: () => !q.includes('MAX') && !q.includes('SUBQUERY'), msg: 'Use a subquery to identify the most recent update using <strong>MAX(timeStamp)</strong>.' },
+      { check: () => q.includes('MAX') && !q.includes('GROUP'), msg: 'Group by <strong>robotID</strong> to get the latest update per robot.' },
+      { check: () => q.includes('FROM') && !q.includes('EMPLOYEE'), msg: 'Join with <strong>Employee</strong> to retrieve first and last names.' },
+      { check: () => q.includes('JOIN') && !q.includes('ROBOT R'), msg: 'Join with <strong>Robot</strong> to filter by status.' },
+      { check: () => !q.includes("'UNDER REPAIR'"), msg: 'Use <strong>r.status = \'Under Repair\'</strong>.' },
+      { check: () => q.includes('WHERE') && !q.includes('ORDER'), msg: 'Sort by <strong>lastUpdate</strong> in descending order to get the most recent update.' },
+      { check: () => q.includes('ORDER') && !q.includes('LIMIT'), msg: 'Use <strong>LIMIT 1</strong> to return only the most recent record.' },
+    ],
+  ];
+
+  const queryRules = rules[queryIndex];
+  if (!queryRules) return null;
+
+  for (const rule of queryRules) {
+    if (rule.check()) return rule.msg;
+  }
+  return null;
+}
+
 /**
  * Updates the game story based on query results
  * @function
@@ -1053,8 +1169,9 @@ function getStory(increaseScore = true, query = '') {
   } else {
     const currentQuery = GameData.queries[GameState.currentQueryIndex];
     
-    if (!isSelectQuery(query)) {
-      appendStoryline('Oops! Please try again.' + currentQuery);
+    
+      const feedback = getAdaptiveFeedback(query, GameState.currentQueryIndex);
+      appendStoryline(feedback || 'Oops! Please try again.');
       if (query !== lastSubmittedQuery) {
         updateScore(-10);
         /* Use the same stylesheet for points deduction */
@@ -1114,7 +1231,6 @@ function getStory(increaseScore = true, query = '') {
           }
         });
       }
-    }
   }
 }
 
