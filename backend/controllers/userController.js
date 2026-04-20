@@ -13,7 +13,7 @@ const getUsers = async (req, res) => {
 
 // New POST endpoint to receive user data
 const submitUserData = async (req, res) => {
-  const { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features } = req.body;
+  const { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features, helpItemsUsed, attemptCount, rewardCategory, pointsBefore, pointsAfter } = req.body;
 
   // Validate required fields
   if (!username || queryIndex === undefined || queryTime === undefined || hintsUsed === undefined || query === undefined || isCorrect === undefined) {
@@ -34,13 +34,18 @@ const submitUserData = async (req, res) => {
       user.personalizedSettings = personalizedSettings;
       // Add new question data
       user.questions.push({
-          questionId: queryIndex,
-          timeUsed: queryTime,
-          query,
-          isCorrect,
-          hintsUsed,
-          features: features || {},
-      });
+    questionId: queryIndex,
+    timeUsed: queryTime,
+    query,
+    isCorrect,
+    hintsUsed,
+    features: features || {},
+    helpItemsUsed: helpItemsUsed || [],
+    attemptCount: attemptCount || 0,
+    rewardCategory: rewardCategory || 0,
+    pointsBefore: pointsBefore || 0,
+    pointsAfter: pointsAfter || 0,
+});
 
       //updateQueriesSolved
       user.totalQueriesSolved = parseInt(user?.questions?.[user.questions.length - 1]?.questionId,10);

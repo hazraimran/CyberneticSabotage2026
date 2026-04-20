@@ -136,6 +136,8 @@ let lastScaffoldQueryIndex = -1;
 // track the attempts students made
 let attemptCount = 0;
 let queryHelpLevel = 0; // 0=none, 1=hint1, 2=hint2/sampleOutput, 3=hint3, 4=finalSQL
+let helpItemsUsed = []; // tracks which help items were used
+let pointsBefore = 0; // score before current query
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -451,14 +453,12 @@ async function initializeGame() {
  * @param {number} score - Current score
  * @returns {Promise<void>}
  */
-async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, features = {}) {
+async function submitUserData(username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, features = {}, analytics = {}) {
   if (!username || queryTime === undefined || queryIndex === undefined || hintsUsed === undefined) {
     return;
   }
-
   const personalizedSettings = getPersonalizedSettings();
-
-  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features};
+  const payload = { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features, ...analytics};
   try {
     const response = await fetch(`${EXTERNAL_API}/users/submitUserData`, {
       method: 'POST',
@@ -511,7 +511,13 @@ async function handleFormSubmit(event) {
       const calculator = new FeatureCalculator(events, window.keystrokeLogger?.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
       const features = calculator.calculateFeatures();
       console.log('=== Calculated features ===', features);
-      await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score, features);
+      await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score, features, {
+  helpItemsUsed: [...helpItemsUsed],
+  attemptCount: attemptCount,
+  rewardCategory: queryHelpLevel,
+  pointsBefore: pointsBefore,
+  pointsAfter: GameState.score,
+});
     } catch (error) {
       console.error('Error submitting user data:', error);
     }
@@ -753,9 +759,9 @@ function getHint() {
   const hintIndex = GameState.currentQueryIndex;
   const hintArray = GameData.hints[hintIndex];
   GameState.hintsUsed++; 
-  if (GameState.hintCounter === 0) queryHelpLevel = Math.max(queryHelpLevel, 1);
-  else if (GameState.hintCounter === 1) queryHelpLevel = Math.max(queryHelpLevel, 2);
-  else if (GameState.hintCounter === 2) queryHelpLevel = Math.max(queryHelpLevel, 3);
+  if (GameState.hintCounter === 0) { queryHelpLevel = Math.max(queryHelpLevel, 1); helpItemsUsed.push('hint1'); }
+  else if (GameState.hintCounter === 1) { queryHelpLevel = Math.max(queryHelpLevel, 2); helpItemsUsed.push('hint2'); }
+  else if (GameState.hintCounter === 2) { queryHelpLevel = Math.max(queryHelpLevel, 3); helpItemsUsed.push('hint3'); }
 
   if (GameState.hintCounter < hintArray.length) {
     updateScore(-GAME_CONFIG.hintPoints[GameState.hintCounter]);
@@ -943,6 +949,8 @@ function startGame() {
   tabHiddenTime = 0;
   tabHiddenStart = null;
   queryHelpLevel = 0; 
+  helpItemsUsed = [];
+  pointsBefore = GameState.score;
   GameState.progress = 10;
   setInterval(updateTimer, 1000);
   // pollSFI
@@ -973,6 +981,8 @@ function restartGame() {
   tabHiddenTime = 0;
   tabHiddenStart = null;
   queryHelpLevel = 0; 
+  helpItemsUsed = [];
+  pointsBefore = GameState.score;
   GameState.currentQueryIndex = 0;
   DOM.hintContainer.textContent = GameData.hints[0][0];
 
@@ -1149,6 +1159,8 @@ function getStory(increaseScore = true, query = '') {
         const rewardMap = [80, 70, 60, 50, 30];
         const reward = rewardMap[queryHelpLevel] ?? 80;
         queryHelpLevel = 0;
+        helpItemsUsed = [];
+        pointsBefore = GameState.score;
         tabHiddenTime = 0;
         tabHiddenStart = null;
         attemptCount = 0;
@@ -1230,12 +1242,14 @@ function getStory(increaseScore = true, query = '') {
         if (result.isConfirmed) {
           updateScore(-70);
           queryHelpLevel = 4;
+          helpItemsUsed.push('finalSQL');
           appendStoryline('The correct answer: ' + GameData.queryAnswers[GameState.currentQueryIndex]);
           attemptCount = 0;
           setTimeout(() => getStory(false), 3000);
         } else if (result.isDenied) {
           updateScore(-30);
           queryHelpLevel = Math.max(queryHelpLevel, 2);
+          helpItemsUsed.push('sampleOutput');
           appendStoryline('Sample output has been deducted from your score.');
           attemptCount = 0;
         }
