@@ -1512,7 +1512,7 @@ async function pollSFI() {
   updateBaseline(features);
 
   try {
-      const response = await fetch('https://cybernetic-sabotage-sfi.onrender.com/sfi/infer', {
+      const response = await fetch('https://cybernetic-sabotage-sfi-zhdv.onrender.com/sfi/infer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
