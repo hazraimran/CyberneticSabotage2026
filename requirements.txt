@@ -1,2 +1,9 @@
 flask
 gunicorn
+python-dotenv
+anthropic
+chromadb
+pgmpy
+numpy
+pandas
+scipy
