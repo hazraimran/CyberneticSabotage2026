@@ -1,4 +1,4 @@
-# Cybernetic Sabotage
+# Cybernetic Sabotage - SFI version
 
 Cybernetic Sabotage is an immersive educational thriller game designed to teach and test SQL concepts through an engaging narrative. Players take on the role of a cybersecurity analyst investigating RoboTech Global's AI-driven robotics division, using SQL queries to uncover the truth behind a series of mysterious incidents.
 
