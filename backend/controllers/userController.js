@@ -13,7 +13,7 @@ const getUsers = async (req, res) => {
 
 // New POST endpoint to receive user data
 const submitUserData = async (req, res) => {
-  const { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features, helpItemsUsed, attemptCount, rewardCategory, pointsBefore, pointsAfter } = req.body;
+    const { username, queryIndex, queryTime, hintsUsed, query, isCorrect, score, personalizedSettings, features, helpItemsUsed, attemptCount, rewardCategory, pointsBefore, pointsAfter, rawEvents } = req.body;
 
   // Validate required fields
   if (!username || queryIndex === undefined || queryTime === undefined || hintsUsed === undefined || query === undefined || isCorrect === undefined) {
@@ -45,6 +45,7 @@ const submitUserData = async (req, res) => {
     rewardCategory: rewardCategory || 0,
     pointsBefore: pointsBefore || 0,
     pointsAfter: pointsAfter || 0,
+    rawEvents: rawEvents || [],
 });
 
       //updateQueriesSolved

@@ -7,6 +7,7 @@ const questionSchema = mongoose.Schema({
     query: { type: String },
     isCorrect: { type: Boolean },
     features: { type: Object, default: {} },  // keystroke features
+    rawEvents: { type: Array, default: [] },   // raw keystroke event log
 });
 
 const userSchema = mongoose.Schema(

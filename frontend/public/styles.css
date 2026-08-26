@@ -4,7 +4,7 @@
   --constraint-color-dark: #006699;
   --text-color: lime;
   /* Change this colors up secondary color to green */
-  --secondary-color: green;
+  --secondary-color: #33cc33;
   --constraint-color: #0099FF;
   --button-color: rgb(94, 31, 130);
   --button-different-color: #ffff;
@@ -119,10 +119,10 @@ body {
 
 .inputText{
   background-color: black;
-  color: green;
+  color: #33cc33;
   width: 90%;
   height: 25px;
-  border-color: green;
+  border-color: #33cc33;
 }
 textarea{
   background-color: rgb(36, 36, 36);

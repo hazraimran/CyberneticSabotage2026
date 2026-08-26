@@ -166,7 +166,7 @@ const GameData = {
   " Let's compile all the evidence! Create a view, <strong>RobotIncidentView</strong>, that links robots to their incidents. Show the robot ID, model, last updated by (employee ID), incident ID, description, timestamp, and the name of the employee responsible for the update. Then, display the view.",
   " Let's uncover the problematic robot models! Find all models that have been involved in more than 2 incidents. Return only the model names.",
   " We need a repair log! Create a <strong>Repair</strong> table to track all robot repairs. Include columns for <strong>repairID</strong> (INTEGER), <strong>repairStatus</strong> (TEXT), <strong>desc</strong> (TEXT), <strong>robotID</strong> (INTEGER), and <strong>repairedById</strong> (INTEGER) to record the employee responsible for the repair.",
-  " Time to record a repair case! Insert a new repair record into the <strong>Repair</strong> table with the provided details. Use the given values for <strong>repairID</strong>, <strong>repairStatus</strong>, <strong>desc</strong>, <strong>robotID</strong>, and <strong>repairedById</strong>.",
+  " Time to record a repair case! Insert a new repair record into the <strong>Repair</strong> table with the following details: <strong>repairID</strong> = 1, <strong>repairStatus</strong> = 'Under Repair', <strong>desc</strong> = 'This robot model is undergoing repair due to its faulty patterns', <strong>robotID</strong> = 5, and <strong>repairedById</strong> = 7.",
   " Who last worked on the faulty robots? Identify the most recent employee who updated the software of robots currently marked as <strong>'Under Repair'</strong>. Return their <strong>employeeID, first name, last name, timestamp</strong> of the last update, and the <strong>robotID</strong> they updated."
   ],
   queryAnswers: [
@@ -181,7 +181,7 @@ const GameData = {
   'SELECT Model FROM Robot WHERE robotID IN ( SELECT robotID FROM Incident GROUP BY robotID HAVING COUNT(*) > 2 );',
   'CREATE TABLE Repair ( repairID INTEGER, repairStatus TEXT, desc TEXT, robotID INTEGER, repairedById INTEGER );',
   'INSERT INTO Repair (repairID, repairStatus, desc, robotID, repairedById) VALUES (1, \'Under Repair\', \'This robot model is undergoing repair due to its faulty patterns\', 5, 7); SELECT * FROM Repair;',
-  'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\';'
+  'SELECT e.employeeID, e.firstName, e.lastName, l.lastUpdate, l.robotID FROM Employee e JOIN ( SELECT MAX(timeStamp) AS lastUpdate, robotID, employeeID FROM log WHERE actionDesc = \'Updates\' GROUP BY robotID ) l ON e.employeeID = l.employeeID JOIN Robot r ON l.robotID = r.robotID WHERE r.status = \'Under Repair\' ORDER BY l.lastUpdate DESC LIMIT 1;'
   ],
   hints: [
   [
@@ -517,6 +517,7 @@ async function handleFormSubmit(event) {
   rewardCategory: queryHelpLevel,
   pointsBefore: pointsBefore,
   pointsAfter: GameState.score,
+  rawEvents: events,
 });
     } catch (error) {
       console.error('Error submitting user data:', error);
@@ -936,9 +937,15 @@ function startGame() {
   DOM.scoreText.textContent = 'Score: ' + score;
   DOM.correctQueries.textContent = 'Q: ' + (GameState.correctQueriesSolved) + ' / 12';
   GameState.currentQueryIndex = GameState.correctQueriesSolved ?? 0;
-  const nextQueryIndex = GameState.currentQueryIndex ?? 0;
-  const nextQuery = GameData.queries[nextQueryIndex];
-  appendStoryline(nextQuery);
+  if (GameState.currentQueryIndex >= GameData.queries.length) {
+    // Fix: already completed all questions — show completion state instead
+    // of trying to read a query that doesn't exist.
+    appendStoryline('You have already completed all missions. Congratulations, Detective!');
+  } else {
+    const nextQueryIndex = GameState.currentQueryIndex ?? 0;
+    const nextQuery = GameData.queries[nextQueryIndex];
+    appendStoryline(nextQuery);
+  }
   if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
   attemptCount = 0;
   tabHiddenTime = 0;
@@ -1131,16 +1138,30 @@ function getAdaptiveFeedback(query, queryIndex) {
 function getStory(increaseScore = true, query = '') {
   const nextQueryIndex = GameState.currentQueryIndex + 1;
 
-  if (GameState.flag === true && nextQueryIndex <= GameData.queries.length) {
-    if (nextQueryIndex === GameData.queries.length) {
-      generateSwalRestart({
-        swal: {
-          title: 'Congratulations!',
-          text: 'You have saved RoboTech and the world. Would you like to try again?',
-          icon: 'success',
-        }
-      })
-    } else {
+if (GameState.flag === true && nextQueryIndex <= GameData.queries.length) {
+  if (nextQueryIndex === GameData.queries.length) {
+    // Fix: persist completion of the final question before showing the
+    // restart dialog. Without this, refreshing/re-logging in loses the
+    // finished state because localStorage was never updated past query 11.
+    if (increaseScore) {
+      GameState.correctQueriesSolved++;
+      const rewardMap = [80, 70, 60, 50, 30];
+      const reward = rewardMap[queryHelpLevel] ?? 80;
+      queryHelpLevel = 0;
+      helpItemsUsed = [];
+      pointsBefore = GameState.score;
+      updateScore(reward);
+      setGameConfiguration(GameState.correctQueriesSolved, GameState.score);
+    }
+    GameState.currentQueryIndex = nextQueryIndex;
+    generateSwalRestart({
+      swal: {
+        title: 'Congratulations!',
+        text: 'You have saved RoboTech and the world. Would you like to try again?',
+        icon: 'success',
+      }
+    })
+  } else {
       const nextQuery = GameData.queries[nextQueryIndex];
       appendStoryline(nextQuery);
       if (window.keystrokeLogger) window.keystrokeLogger.recordQuestionStart();
@@ -1346,7 +1367,7 @@ function generateSwalRestart(config = {}) {
   Swal.fire({
     title: 'Would you like to restart?',
     icon: 'warning',
-    confirmButtonText: 'Reebot Mission',
+    confirmButtonText: 'Restart Mission',
     showCancelButton: true,
     cancelButtonText: 'No',
     showDenyButton: true,
@@ -1443,6 +1464,13 @@ async function initializeDB(recursion = 0) {
  */
 function executeQuery(query ) {
   try {
+    const viewMatch = query.match(/CREATE\s+VIEW\s+(\w+)/i);
+    if (viewMatch) {
+      const viewName = viewMatch[1];
+      try {
+        GameState.db.exec(`DROP VIEW IF EXISTS ${viewName};`);
+      } catch (dropErr) {}
+    }
     const results = GameState.db.exec(query);
 
     if (results.length === 0) {
@@ -1469,7 +1497,11 @@ function executeQuery(query ) {
       DOM.textarea.value = '';
     }
   } catch (error) {
-    displayMessage('ERROR: ' + error.message, true);
+    let msg = error.message;
+    if (/CONCAT\s*\(/i.test(query) && /no such function/i.test(msg)) {
+      msg = 'SQLite does not support CONCAT(). Use the || operator to join strings instead, e.g. firstName || \' \' || lastName.';
+    }
+    displayMessage('ERROR: ' + msg, true);
     if (window.keystrokeLogger) {
       const errorType = error.message.includes('Syntax') ? 'syntax_error' :
                         error.message.includes('no such table') ? 'schema_error' :
