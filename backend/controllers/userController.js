@@ -49,7 +49,11 @@ const submitUserData = async (req, res) => {
 });
 
       //updateQueriesSolved
-      user.totalQueriesSolved = parseInt(user?.questions?.[user.questions.length - 1]?.questionId,10);
+      const last = user?.questions?.[user.questions.length - 1];
+        if (last) {
+        const qid = parseInt(last.questionId, 10);
+        user.totalQueriesSolved = last.isCorrect ? qid : qid - 1;
+        }
 
 
       await user.save();

@@ -1527,12 +1527,13 @@ function executeQuery(query ) {
       msg = 'SQLite does not support CONCAT(). Use the || operator to join strings instead, e.g. firstName || \' \' || lastName.';
     }
     displayMessage('ERROR: ' + msg, true);
-    if (window.keystrokeLogger) {
-      const errorType = error.message.includes('Syntax') ? 'syntax_error' :
-                        error.message.includes('no such table') ? 'schema_error' :
-                        'semantic_error';
-      window.keystrokeLogger.logError(error.message, errorType);
-    }
+      if (window.keystrokeLogger) {
+        const lowerMsg = error.message.toLowerCase();
+        const errorType = lowerMsg.includes('syntax error') ? 'syntax_error' :
+                          (lowerMsg.includes('no such table') || lowerMsg.includes('no such column')) ? 'schema_error' :
+                          'semantic_error';
+        window.keystrokeLogger.logError(error.message, errorType);
+      }
     GameState.flag = false;
   }
   scrollToBottom();
