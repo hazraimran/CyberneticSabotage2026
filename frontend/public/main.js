@@ -1395,7 +1395,7 @@ function generateSwalRestart(config = {}) {
     confirmButtonText: 'Restart Mission',
     showCancelButton: true,
     cancelButtonText: 'No',
-    showDenyButton: true,
+    showDenyButton: false,
     denyButtonText: 'Provide Feedback',
     color: '#fff',
     background: '#26242470',
