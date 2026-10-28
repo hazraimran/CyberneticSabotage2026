@@ -121,8 +121,12 @@ class KeystrokeLogger {
     }
 
     recordQuestionStart() {
-        this.questionStartTime = Date.now();
+        this.events = [];                // 清空上一题的事件
+        this.lastKeystrokeTime = null;   // 新题第一个按键不再算和上一题的间隔
+        this.lastErrorTime = null;       // 上一题的报错不影响新题
+        this.attemptNumber = 0;          // 每题的尝试次数从 1 开始
         this.firstKeystrokeTime = null;
+        this.questionStartTime = Date.now();
         console.log('Question start time recorded:', this.questionStartTime);
     }
 

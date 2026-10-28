@@ -396,10 +396,6 @@ function initializeEventListeners() {
   DOM.textarea.addEventListener('paste', (e) => {
     if (window.keystrokeLogger) window.keystrokeLogger.logPaste(e);
   });
-
-  DOM.form.addEventListener('submit', (e) => {
-    if (window.keystrokeLogger) window.keystrokeLogger.logQuerySubmit(DOM.textarea.value);
-  });
   
   // Week7: Mouse hover tracking on Schema panel
   const schemaPanel = document.querySelector('.table-container');
@@ -491,9 +487,26 @@ async function submitUserData(username, queryIndex, queryTime, hintsUsed, query,
  */
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const x = document.forms['query-input']['query-input-box'].value;
   const query = DOM.textarea.value;
-  
+  const logger = window.keystrokeLogger;
+
+  // 1. 先记录提交事件（此时输入框还没被清空）
+  if (logger) logger.logQuerySubmit(query);
+
+  // 2. 判题之前，先把本题的状态存下来
+  const snapshot = {
+    queryIndex: GameState.currentQueryIndex,
+    questionStartTime: logger?.questionStartTime,
+    events: logger ? [...logger.getEvents()] : [],
+    tabHiddenTime: tabHiddenTime,
+    helpItemsUsed: [...helpItemsUsed],
+    queryHelpLevel: queryHelpLevel,
+    pointsBefore: pointsBefore,
+    attemptCount: attemptCount,
+    hintsUsed: GameState.hintCounter,
+  };
+
+  // 3. 判题（这里面可能会切到下一题）
   if (!validateForm()) {
     displayMessage('Empty Query Provided', true);
   } else if (!isValidSQLQuery(query)) {
@@ -501,29 +514,41 @@ async function handleFormSubmit(event) {
   } else {
     analyzeQuery(query);
   }
-
-  // Scroll to bottom once at the end
   scrollToBottom();
 
-  // add push to database over here
+  // 4. 用快照里的数据提交
   try {
-      const events = window.keystrokeLogger ? window.keystrokeLogger.getEvents() : [];
-      const calculator = new FeatureCalculator(events, window.keystrokeLogger?.questionStartTime, GameState.currentQueryIndex, tabHiddenTime);
-      const features = calculator.calculateFeatures();
-      console.log('=== Calculated features ===', features);
-      await submitUserData(localStorage.getItem('user'), GameState.currentQueryIndex, timeElapsed(), GameState.hintsUsed, x, GameState.flag, GameState.score, features, {
-  helpItemsUsed: [...helpItemsUsed],
-  attemptCount: attemptCount,
-  rewardCategory: queryHelpLevel,
-  pointsBefore: pointsBefore,
-  pointsAfter: GameState.score,
-  rawEvents: events,
-});
-    } catch (error) {
-      console.error('Error submitting user data:', error);
-    }
-}
+    const calculator = new FeatureCalculator(
+      snapshot.events, snapshot.questionStartTime, snapshot.queryIndex, snapshot.tabHiddenTime
+    );
+    const features = calculator.calculateFeatures();
+    const queryTime = snapshot.questionStartTime
+      ? Math.round((Date.now() - snapshot.questionStartTime) / 1000)
+      : timeElapsed();
+    const finalAttempt = GameState.flag ? snapshot.attemptCount + 1 : attemptCount;
 
+    await submitUserData(
+      localStorage.getItem('user'),
+      snapshot.queryIndex + 1,   // 保持 1–12 编号，和现有数据一致
+      queryTime,
+      snapshot.hintsUsed,
+      query,
+      GameState.flag,
+      GameState.score,
+      features,
+      {
+        helpItemsUsed: snapshot.helpItemsUsed,
+        attemptCount: finalAttempt,
+        rewardCategory: snapshot.queryHelpLevel,
+        pointsBefore: snapshot.pointsBefore,
+        pointsAfter: GameState.score,
+        rawEvents: snapshot.events,
+      }
+    );
+  } catch (error) {
+    console.error('Error submitting user data:', error);
+  }
+}
 /**
  * Analyzes the query and updates the UI
  * @async
